@@ -16,9 +16,9 @@ import (
   "github.com/jinzhu/gorm"
   _ "github.com/go-sql-driver/mysql" 
   _ "github.com/jpfuentes2/go-env/autoload"
-  "github.com/networth-server/models"
-  "github.com/networth-server/services"
-  "github.com/networth-server/controllers"
+  "github.com/net-worth-server/models"
+  "github.com/net-worth-server/services"
+  "github.com/net-worth-server/controllers"
 )
 
 //

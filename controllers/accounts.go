@@ -10,7 +10,7 @@ package controllers
 
 import (
   "net/http"
-  "github.com/networth-server/models"  
+  "github.com/net-worth-server/models"  
 )
 
 //
