@@ -38,6 +38,7 @@ type Datastore interface {
   GetAllMarks() []Mark
   MarkByDate(time.Time) error
   GetMarkByDate(date time.Time) (*Mark, error)
+  GetMarkAccountUnitsByAccountId(uint) float64
   
 }
 
