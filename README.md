@@ -6,6 +6,12 @@ If your anything like me you are constantly adding money to your investments. So
 
 The Net worth server is also helpful for keeping track of your investments across platforms. For example I like to know how I am doing from my brokerage, options, futures trading accounts. Lets throw in investments such as [Lending Club](https://www.lendingclub.com/), [Prosper](https://www.prosper.com), [Peer Street](https://www.peerstreet.com), [Realtyshares](https://www.realtyshares.com/). Heck lets track how our Real Estate investments are doing via [Zillow](https://www.zillow.com/). 
 
+# Client Software For Engaging With Net Worth Server
+
+Net worth server is not really useful without a client. Here is a list of clients to checkout. 
+
+* [Net Worth CLI](https://github.com/optionscafe/net-worth-cli)
+
 # Ansible Deployment 
 
 There are some Ansible scripts in place to deploy this application to a docker server. You can find these scripts in ```ansible```. There are a few files you have to put into place as I did not want to commit them to git.
