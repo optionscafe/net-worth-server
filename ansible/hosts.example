@@ -1,0 +1,2 @@
+[production]
+example.com ansible_ssh_user=ec2-user

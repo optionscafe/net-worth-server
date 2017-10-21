@@ -12,9 +12,7 @@ import (
   "time"
   "net/http"
   "github.com/gorilla/mux"
-  "github.com/gorilla/handlers"  
-  "github.com/jinzhu/gorm"
-  _ "github.com/go-sql-driver/mysql" 
+  "github.com/gorilla/handlers"
   _ "github.com/jpfuentes2/go-env/autoload"
   "github.com/net-worth-server/models"
   "github.com/net-worth-server/services"
@@ -27,7 +25,7 @@ import (
 func main() {
     
   // Start the db connection.
-  db, err := SetupDb()
+  db, err := models.NewDB()
 
   if err != nil {
     services.LogFatal(err, "Failed to connect database")
@@ -42,13 +40,26 @@ func main() {
   // Set Router
   r := mux.NewRouter()
 
-  // Define routes
-  r.HandleFunc("/api/v1/accounts", c.GetAccountsHandler).Methods("GET")
-  r.HandleFunc("/api/v1/accounts/{id}", c.GetAccountHandler).Methods("GET")
+  // Mark routes
+  r.HandleFunc("/api/v1/marks", c.GetMarks).Methods("GET")
+
+  // Account routes
+  r.HandleFunc("/api/v1/accounts", c.GetAccounts).Methods("GET")
+  r.HandleFunc("/api/v1/accounts", c.CreateAccount).Methods("POST")
+  r.HandleFunc("/api/v1/accounts/{id}", c.GetAccount).Methods("GET")
+  r.HandleFunc("/api/v1/accounts/{id}/marks", c.GetAccountMarks).Methods("GET")
+  r.HandleFunc("/api/v1/accounts/{id}/marks", c.CreateAccountMark).Methods("POST")
+
+  // Setup handler
+  var handler = c.AuthMiddleware(r)
+
+  if os.Getenv("LOG_REQUESTS") == "true" {
+    handler = handlers.CombinedLoggingHandler(os.Stdout, c.AuthMiddleware(r))
+  }
   
   // Setup http server    
   srv := &http.Server{
-    Handler: handlers.CombinedLoggingHandler(os.Stdout, c.AuthMiddleware(r)),
+    Handler: handler,
     Addr: ":" + os.Getenv("HTTP_PORT"),
     WriteTimeout: 15 * time.Second,
     ReadTimeout: 15 * time.Second,
@@ -59,29 +70,6 @@ func main() {
 
   // Start server and log if fails
   log.Fatal(srv.ListenAndServe())
-}
-
-//
-// Setup the db connection.
-//
-func SetupDb() (*gorm.DB, error) {
-
-  // Connect to Mysql
-  db, err := gorm.Open("mysql", os.Getenv("DB_USERNAME") + ":" + os.Getenv("DB_PASSWORD") + "@" + os.Getenv("DB_HOST") + "/" + os.Getenv("DB_DATABASE") + "?charset=utf8&parseTime=True&loc=Local")
-  
-  if err != nil {
-    return nil, err
-  }
-
-  // Enable
-  //t.Connection.LogMode(true)
-  //t.Connection.SetLogger(log.New(os.Stdout, "\r\n", 0))  
-
-  // Run migrations
-  db.AutoMigrate(&models.Account{})
-
-  // Return db connection.
-  return db, nil
 }
 
 /* End File */

@@ -1,0 +1,40 @@
+# {{ ansible_managed }}
+
+version: '2.1'
+
+services:
+
+  # App
+  app:
+           
+    hostname: {{ COMPOSE_PROJECT_NAME }}
+
+    container_name: {{ COMPOSE_PROJECT_NAME }}
+    
+    build:
+      context: ./build
+      dockerfile: Dockerfile
+      args:
+        P_UID: {{ P_UID }}
+        P_GID: {{ P_GID }}    
+    
+    image: {{ COMPOSE_PROJECT_NAME }}/golang:1.8.1-alpine
+
+    logging:
+      driver: "syslog"
+      options:
+        syslog-address: {{ SYSLOG_ADDRESS }}
+        tag: {{ COMPOSE_PROJECT_NAME }}
+                
+    restart: {{ DOCKER_RESTART }}
+    
+    env_file:
+      - .env      
+                      
+    networks:
+      - {{ NETWORK }} 
+  
+networks:
+  shared:
+    external:
+      name: {{ NETWORK }} 

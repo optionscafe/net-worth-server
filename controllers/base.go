@@ -11,12 +11,11 @@ import (
   "strings"
   "net/http"
   "encoding/json"
-  "github.com/jinzhu/gorm"
-  "github.com/gorilla/mux"
+  "github.com/net-worth-server/models"
 )
 
 type Controller struct {
-  DB *gorm.DB
+  DB models.Datastore
 }
 
 //
@@ -48,21 +47,18 @@ func (t *Controller) AuthMiddleware(next http.Handler) http.Handler {
 }
 
 //
-// Return one record based on the model we pass in. Sort of a generic function
-// might not use this function in all API calls.
+// JSON Decoder. This returns a populated object.
 //
-func (t *Controller) RespondById(m interface{}, w http.ResponseWriter, r *http.Request) {
+func (t *Controller) DecodePostedJson(m interface{}, w http.ResponseWriter, r *http.Request) {
 
-  vars := mux.Vars(r)
-
-  // Find result or send 404
-  if err := t.DB.First(m, vars["id"]).Error; err != nil {
-    t.RespondError(w, http.StatusNotFound, err.Error())
+  decoder := json.NewDecoder(r.Body)
+  
+  if err := decoder.Decode(m); err != nil {
+    t.RespondError(w, http.StatusBadRequest, err.Error())
     return
   }
-
-  // Return happy (json)
-  t.RespondJSON(w, http.StatusOK, m)
+  
+  r.Body.Close()
 }
 
 //

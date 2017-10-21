@@ -1,0 +1,29 @@
+---
+
+# Setup base directory
+- name: Setup {{ SERVER_ROOT }} base directory
+  file: path={{ SERVER_ROOT }} owner={{ SERVER_USER }} group={{ SERVER_GROUP }} mode=0755 state=directory
+
+# Create docker directory
+- name: Create docker directory
+  file: path={{ SERVER_ROOT }}/docker owner={{ SERVER_USER }} group={{ SERVER_GROUP }} mode=0755 state=directory
+
+# Create docker build directory
+- name: Create docker build directory
+  file: path={{ SERVER_ROOT }}/docker/build owner={{ SERVER_USER }} group={{ SERVER_GROUP }} mode=0755 state=directory
+
+# Install docker-compose
+- name: Install docker-compose
+  template: src=docker-compose.yml dest={{ SERVER_ROOT }}/docker/docker-compose.yml owner={{ SERVER_USER }} group={{ SERVER_GROUP }} mode=0644
+
+# Install Dockerfile
+- name: Install Dockerfile
+  template: src=Dockerfile dest={{ SERVER_ROOT }}/docker/build/Dockerfile owner={{ SERVER_USER }} group={{ SERVER_GROUP }} mode=0644
+
+# Install ENV File
+- name: Install ENV File
+  template: src=env dest={{ SERVER_ROOT }}/docker/.env owner={{ SERVER_USER }} group={{ SERVER_GROUP }} mode=0644
+
+# Install aoo binary
+- name: Copying app binary to server(s)
+  copy: src=../builds/net-worth-server dest={{ SERVER_ROOT }}/docker/build owner={{ SERVER_USER }} group={{ SERVER_GROUP }} mode=0755

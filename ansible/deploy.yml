@@ -1,0 +1,9 @@
+---
+
+- name: Deploys the net-worth-server to production
+  hosts: production
+  roles:
+    - app
+    
+  vars_files:
+    - "vars/env.yml"
