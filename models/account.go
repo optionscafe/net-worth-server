@@ -103,7 +103,7 @@ func (db *DB) CreateAccount(account *Account) error {
   }  
 
   // When we create our units are one unit per dollar lets map the units with the dollars  
-  db.Create(&AccountUnits{ AccountId: account.Id, Amount: account.Balance, Units: account.Balance, PricePer: 1.00, Note: "Account Opening - " + account.Name })  
+  db.Create(&AccountUnits{ AccountId: account.Id, Date: time.Now(), Amount: account.Balance, Units: account.Balance, PricePer: 1.00, Note: "Account Opening - " + account.Name })  
 
   // Mark the value of the account as of today.  
   db.Create(&AccountMarks{ Date: time.Now(), AccountId: account.Id, Balance: account.Balance })  

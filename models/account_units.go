@@ -15,6 +15,7 @@ type AccountUnits struct {
   CreatedAt time.Time `json:"created_at"`
   UpdatedAt time.Time `json:"updated_at"`
   AccountId uint `sql:"not null;index:UserId" json:"account_id"`
+  Date time.Time `gorm:"type:date" json:"date"`  
   Amount float64 `sql:"type:DECIMAL(12,2)" json:"amount"`
   Units float64 `sql:"type:DECIMAL(12,2)" json:"units"`
   PricePer float64 `sql:"type:DECIMAL(12,2)" json:"price_per"`  
