@@ -43,6 +43,10 @@ func main() {
   // Mark routes
   r.HandleFunc("/api/v1/marks", c.GetMarks).Methods("GET")
 
+  // Ledgers routes
+  r.HandleFunc("/api/v1/ledgers", c.GetLedgers).Methods("GET")
+  r.HandleFunc("/api/v1/ledgers", c.CreateLedger).Methods("POST")
+
   // Account routes
   r.HandleFunc("/api/v1/accounts", c.GetAccounts).Methods("GET")
   r.HandleFunc("/api/v1/accounts", c.CreateAccount).Methods("POST")

@@ -34,6 +34,10 @@ type Datastore interface {
   AddUnits(date time.Time, amount float64, note string) error
   GetUnitsTotalCount() float64
 
+  // Ledgers
+  GetAllLedgers() []Ledger
+  CreateLedger(uint, time.Time, float64, string) (*Ledger, error)   
+
   // Marks
   GetAllMarks() []Mark
   MarkByDate(time.Time) error
@@ -69,7 +73,8 @@ func NewDB() (*DB, error) {
 
   // Run migrations
   db.AutoMigrate(&Unit{})
-  db.AutoMigrate(&Mark{})  
+  db.AutoMigrate(&Mark{}) 
+  db.AutoMigrate(&Ledger{})    
   db.AutoMigrate(&Account{})
   db.AutoMigrate(&AccountMarks{})
   db.AutoMigrate(&AccountUnits{})

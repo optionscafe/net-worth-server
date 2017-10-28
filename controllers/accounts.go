@@ -65,7 +65,10 @@ func (t *Controller) CreateAccount(w http.ResponseWriter, r *http.Request) {
   account := models.Account{}
 
   // Decode the json we posted in.
-  t.DecodePostedJson(&account, w, r)
+  if err := t.DecodePostedJson(&account, w, r); err != nil {
+    t.RespondError(w, http.StatusBadRequest, err.Error())
+    return
+  }  
 
   // Store in database & return json.
   if err := t.DB.CreateAccount(&account); err != nil {

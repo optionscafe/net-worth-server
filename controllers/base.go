@@ -49,16 +49,18 @@ func (t *Controller) AuthMiddleware(next http.Handler) http.Handler {
 //
 // JSON Decoder. This returns a populated object.
 //
-func (t *Controller) DecodePostedJson(m interface{}, w http.ResponseWriter, r *http.Request) {
+func (t *Controller) DecodePostedJson(m interface{}, w http.ResponseWriter, r *http.Request) error {
 
   decoder := json.NewDecoder(r.Body)
   
   if err := decoder.Decode(m); err != nil {
-    t.RespondError(w, http.StatusBadRequest, err.Error())
-    return
+    return err
   }
   
   r.Body.Close()
+
+  // Return happy.
+  return nil
 }
 
 //
