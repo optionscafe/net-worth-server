@@ -36,7 +36,10 @@ type Datastore interface {
 
   // Ledgers
   GetAllLedgers() []Ledger
-  CreateLedger(uint, time.Time, float64, string) (*Ledger, error)   
+  CreateLedger(uint, time.Time, float64, string, string) (*Ledger, error)   
+
+  // LedgerCategory
+  GetLedgerCategoryById(uint) (LedgerCategory, error)
 
   // Marks
   GetAllMarks() []Mark
@@ -78,6 +81,7 @@ func NewDB() (*DB, error) {
   db.AutoMigrate(&Account{})
   db.AutoMigrate(&AccountMarks{})
   db.AutoMigrate(&AccountUnits{})
+  db.AutoMigrate(&LedgerCategory{})
 
   // Return db connection.
   return &DB{db}, nil
