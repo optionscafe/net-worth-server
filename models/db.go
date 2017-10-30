@@ -31,7 +31,7 @@ type Datastore interface {
   GetMarksByAccountByIdAndDate(uint, time.Time) (AccountMarks, error)
 
   // Units
-  AddUnits(date time.Time, amount float64, note string) error
+  AddUnits(time.Time, float64, string) error
   GetUnitsTotalCount() float64
 
   // Ledgers
@@ -44,7 +44,7 @@ type Datastore interface {
   // Marks
   GetAllMarks() []Mark
   MarkByDate(time.Time) error
-  GetMarkByDate(date time.Time) (*Mark, error)
+  GetMarkByDate(time.Time) (*Mark, error)
   GetMarkAccountUnitsByAccountId(uint) float64
   
 }
