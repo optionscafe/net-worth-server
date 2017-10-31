@@ -12,6 +12,10 @@ Net worth server is not really useful without a client. Here is a list of client
 
 * [Net Worth CLI](https://github.com/optionscafe/net-worth-cli)
 
+# Unit Testing 
+
+With unit testing we setup a testing database (based off the value of the ```DB_DATABASE_TESTING``` OS variable). We run our tests at the highest levels. For example for an HTTP call (which is most of the app) we test the HTTP response controller. This way we are testing the models and helper packages that goes into generating the HTTP response, by doing it this way we get pretty great coverage. The goal is to cover the entire app just at the highest levels.  
+
 # Ansible Deployment 
 
 There are some Ansible scripts in place to deploy this application to a docker server. You can find these scripts in ```ansible```. There are a few files you have to put into place as I did not want to commit them to git.
