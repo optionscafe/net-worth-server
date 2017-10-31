@@ -8,7 +8,7 @@ package models
 
 import (
   "os"
-  //"log" 
+  "flag" 
   "time"
   "github.com/jinzhu/gorm"
   _ "github.com/go-sql-driver/mysql"
@@ -58,8 +58,16 @@ type DB struct {
 //
 func NewDB() (*DB, error) {
 
+  dbName := os.Getenv("DB_DATABASE") 
+
+  // Is this a testing run?
+  if flag.Lookup("test.v") != nil {
+    dbName = os.Getenv("DB_DATABASE_TESTING") 
+  }
+
   // Connect to Mysql
-  db, err := gorm.Open("mysql", os.Getenv("DB_USERNAME") + ":" + os.Getenv("DB_PASSWORD") + "@" + os.Getenv("DB_HOST") + "/" + os.Getenv("DB_DATABASE") + "?charset=utf8&parseTime=True&loc=UTC")
+  db, err := gorm.Open("mysql", os.Getenv("DB_USERNAME") + ":" + os.Getenv("DB_PASSWORD") + "@" + os.Getenv("DB_HOST") + "/" + dbName + "?charset=utf8&parseTime=True&loc=UTC")  
+
   
   if err != nil {
     return nil, err
@@ -83,8 +91,42 @@ func NewDB() (*DB, error) {
   db.AutoMigrate(&AccountUnits{})
   db.AutoMigrate(&LedgerCategory{})
 
+  // Is this a testing run? If so load testing data.
+  if flag.Lookup("test.v") != nil {
+    LoadTestingData(db)
+  }
+
   // Return db connection.
   return &DB{db}, nil
+}
+
+//
+// Load testing data.
+//
+func LoadTestingData(db *gorm.DB) {
+
+  // Shared time we use.
+  ts := time.Date(2017, 10, 29, 17, 20, 01, 507451, time.UTC)
+
+  // Accounts
+  db.Exec("TRUNCATE TABLE accounts;")
+  db.Create(&Account{ Name: "Tradier", Balance: 14678.33, Units: 14678.33 })
+  db.Create(&Account{ Name: "E*Trade", Balance: 85345.33, Units: 85345.33 })
+  db.Create(&Account{ Name: "Lending Club", Balance: 5000.00, Units: 5000.00 })  
+
+  // Ledger Categories
+  db.Exec("TRUNCATE TABLE ledger_categories;")  
+  db.Create(&LedgerCategory{ Name: "Dividends" })  
+  db.Create(&LedgerCategory{ Name: "Rent Payment" })
+  db.Create(&LedgerCategory{ Name: "Other Income" })
+
+  // Ledgers
+  db.Exec("TRUNCATE TABLE ledgers;")  
+  db.Create(&Ledger{ AccountId: 1, Date: ts, Amount: 55.45, Note: "1st ledger test.", CategoryId: 1 })
+  db.Create(&Ledger{ AccountId: 2, Date: ts, Amount: 1155.45, Note: "2nd ledger test.", CategoryId: 2 })
+  db.Create(&Ledger{ AccountId: 3, Date: ts, Amount: 155.45, Note: "3rd ledger test.", CategoryId: 3 })
+  db.Create(&Ledger{ AccountId: 3, Date: ts, Amount: 455.00, Note: "4th ledger test.", CategoryId: 1 })    
+
 }
 
 /* End File */
