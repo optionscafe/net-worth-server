@@ -14,6 +14,7 @@ import (
   "github.com/gorilla/mux"
   "github.com/gorilla/handlers"
   _ "github.com/jpfuentes2/go-env/autoload"
+  "github.com/net-worth-server/cron"
   "github.com/net-worth-server/models"
   "github.com/net-worth-server/services"
   "github.com/net-worth-server/controllers"
@@ -33,6 +34,9 @@ func main() {
 
   // Close db when this app dies. (This might be useless)
   defer db.Close()
+
+  // Setup cron jobs
+  cron.TradierStart(db)
 
   // Startup controller
   c := &controllers.Controller{ DB: db }

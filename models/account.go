@@ -18,7 +18,8 @@ type Account struct {
   UpdatedAt time.Time `json:"updated_at"`
   Name string `sql:"not null" json:"name"`
   Balance float64 `sql:"type:DECIMAL(12,2)" json:"balance"`
-  Units float64 `gorm:"-" json:"units"`    
+  Units float64 `gorm:"-" json:"units"`
+  AccountNumber string `sql:"not null" json:"account_number"`      
 } 
 
 //
