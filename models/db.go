@@ -111,8 +111,8 @@ func LoadTestingData(db *gorm.DB) {
 
   // Accounts
   db.Exec("TRUNCATE TABLE accounts;")
-  db.Create(&Account{ Name: "Tradier", Balance: 14678.33, Units: 14678.33, AccountNumber: "1111111" })
-  db.Create(&Account{ Name: "E*Trade", Balance: 85345.33, Units: 85345.33, AccountNumber: "23423499" })
+  db.Create(&Account{ Name: "Tradier", Balance: 14678.33, Units: 14678.33, AccountNumber: "7af234fS" })
+  db.Create(&Account{ Name: "Ally", Balance: 85345.33, Units: 85345.33, AccountNumber: "23423499" })
   db.Create(&Account{ Name: "Lending Club", Balance: 5000.00, Units: 5000.00, AccountNumber: "1238888" })  
 
   // Add Account Units

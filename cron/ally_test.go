@@ -11,14 +11,14 @@ import (
   "testing"
   "github.com/jpfuentes2/go-env"  
   "github.com/net-worth-server/models"
-  "github.com/net-worth-server/brokers/tradier"        
+  "github.com/net-worth-server/brokers/ally"        
 )
 
 //
-// Make a call to tradier get balance and then market it.
+// Make a call to ally get balance and then market it.
 // This is called once a day at the end of the day.
 //
-func TestMarkTradier(t *testing.T) {
+func TestMarkAlly(t *testing.T) {
 
   // Load config file. 
   env.ReadEnv("../.env")
@@ -30,40 +30,34 @@ func TestMarkTradier(t *testing.T) {
   db, _ := models.NewDB()
   defer db.Close()  
 
-  var balances = []tradier.Balance{
-    tradier.Balance{
+  var balances = []ally.Balance{
+    ally.Balance{
       AccountNumber: "12312312",
       AccountValue: 100.00,
-      TotalCash: 100.00,
-      OptionBuyingPower: 100.00,
-      StockBuyingPower: 100.00,
+      AccountName: "Account ABC",
     },
 
-    tradier.Balance{
-      AccountNumber: "7af234fS",
+    ally.Balance{
+      AccountNumber: "23423499",
       AccountValue: 66444.77,
-      TotalCash: 66444.77,
-      OptionBuyingPower: 66444.77,
-      StockBuyingPower: 66444.77,
+      AccountName: "Account 123",
     },
 
-    tradier.Balance{
+    ally.Balance{
       AccountNumber: "1ba4dk9d",
       AccountValue: 777.11,
-      TotalCash: 777.11,
-      OptionBuyingPower: 777.11,
-      StockBuyingPower: 777.11,
+      AccountName: "Account XYZ",
     },
   }
 
   // Process the mark
-  processMarkTradier(db, balances, 1, ts, "7af234fS")
+  processMarkAlly(db, balances, 2, ts, "23423499")
 
   // Query to make sure this was stored in the database as it should.
-  account, _ := db.GetAccountById(1)
+  account, _ := db.GetAccountById(2)
 
   // Query and get the mark we just placed.
-  mark, _ := db.GetMarksByAccountByIdAndDate(1, ts)
+  mark, _ := db.GetMarksByAccountByIdAndDate(2, ts)
 
   // Did we store the account balance in the correct field?
   if account.Balance != 66444.77 {
@@ -81,8 +75,8 @@ func TestMarkTradier(t *testing.T) {
   }
 
   // Mark - PricePer
-  if mark.PricePer != 4.53 {
-    t.Errorf("\n\n...expected = %v\n\n...obtained = %v\n\n", 4.53, mark.PricePer)
+  if mark.PricePer != 0.78 {
+    t.Errorf("\n\n...expected = %v\n\n...obtained = %v\n\n", 0.78, mark.PricePer)
   }
 
 }

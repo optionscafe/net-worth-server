@@ -14,22 +14,22 @@ import (
   "github.com/jasonlvhit/gocron" 
   "github.com/net-worth-server/models"
   "github.com/net-worth-server/services"    
-  "github.com/net-worth-server/brokers/tradier"
+  "github.com/net-worth-server/brokers/ally"
 )
 
 //
 // Setup Cron Job
 //
-func TradierStart(db *models.DB) {
+func AllyStart(db *models.DB) {
 
   go func() {
   
     // Lets get started
-    services.LogInfo("Cron Tradier Started")  
+    services.LogInfo("Cron Ally Started")  
 
     // Setup jobs we need to run 
-    //gocron.Every(1).Second().Do(func () { MarkTradier(db) })
-    gocron.Every(1).Day().At("22:00").Do(func () { MarkTradier(db) })
+    //gocron.Every(1).Second().Do(func () { MarkAlly(db) })
+    gocron.Every(1).Day().At("22:05").Do(func () { MarkAlly(db) })
 
     // function Start all the pending jobs
     <- gocron.Start()
@@ -39,10 +39,10 @@ func TradierStart(db *models.DB) {
 }
 
 //
-// Make a call to tradier get balance and then market it.
+// Make a call to ally get balance and then market it.
 // This is called once a day at the end of the day.
 //
-func MarkTradier(db *models.DB) error {
+func MarkAlly(db *models.DB) error {
 
   var targetAccountId uint = 0
 
@@ -51,18 +51,18 @@ func MarkTradier(db *models.DB) error {
 
   // Loop through and find the account Id
   for _, row := range accounts {
-    if row.AccountNumber == os.Getenv("TRADIER_ACCOUNT") {
+    if row.AccountNumber == os.Getenv("ALLY_ACCOUNT") {
       targetAccountId = row.Id   
     }
   }
 
   // Make sure we found an account
   if targetAccountId == 0 {
-    return errors.New("No account found - " + os.Getenv("TRADIER_ACCOUNT"))
+    return errors.New("No account found - " + os.Getenv("ALLY_ACCOUNT"))
   }
 
   // Get all the balances from Tradier.
-  balances, err := tradier.GetBalances()
+  balances, err := ally.GetBalances()
 
   if err != nil {
     return err
@@ -73,15 +73,15 @@ func MarkTradier(db *models.DB) error {
   date := time.Date(ts.Year(), ts.Month(), ts.Day(), 0, 0, 0, 0, time.UTC)
 
   // Process the Marked data.
-  processMarkTradier(db, balances, targetAccountId, date, os.Getenv("TRADIER_ACCOUNT"))
+  processMarkAlly(db, balances, targetAccountId, date, os.Getenv("ALLY_ACCOUNT"))
 
   // Send health check notice.
-  if len(os.Getenv("HEALTH_CHECK_MARKTRADIER_URL")) > 0 {
+  if len(os.Getenv("HEALTH_CHECK_ALLY_URL")) > 0 {
 
-    resp, err := http.Get(os.Getenv("HEALTH_CHECK_MARKTRADIER_URL"))
+    resp, err := http.Get(os.Getenv("HEALTH_CHECK_ALLY_URL"))
     
     if err != nil {
-      services.LogError(err, "Could send health check - " + os.Getenv("HEALTH_CHECK_MARKTRADIER_URL"))
+      services.LogError(err, "Could send HEALTH_CHECK_ALLY_URL health check - " + os.Getenv("HEALTH_CHECK_ALLY_URL"))
     }
     
     defer resp.Body.Close()
@@ -89,22 +89,22 @@ func MarkTradier(db *models.DB) error {
   }
 
   // Log
-  services.LogInfo("Tradier account marked from cron")
+  services.LogInfo("Ally account marked from cron")
 
   // Return happy
   return nil
 }
 
 //
-// Process marking from Tradier.
+// Process marking from Ally.
 //
-func processMarkTradier(db *models.DB, balances []tradier.Balance, targetAccountId uint, date time.Time, accountNumber string) error {
+func processMarkAlly(db *models.DB, balances []ally.Balance, targetAccountId uint, date time.Time, AccountNumber string) error {
 
   // Loop through the different Tradier accounts.
   for _, row := range balances {
 
-    // Find the tradier account we are after. Then mark the asset
-    if row.AccountNumber == accountNumber{
+    // Find the ally account we are after. Then mark the asset
+    if row.AccountNumber == AccountNumber {
       db.MarkAccountByDate(targetAccountId, date, row.AccountValue)
       break
     }

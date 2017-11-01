@@ -36,6 +36,7 @@ func main() {
   defer db.Close()
 
   // Setup cron jobs
+  cron.AllyStart(db)
   cron.TradierStart(db)
 
   // Startup controller
