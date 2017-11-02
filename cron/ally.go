@@ -23,16 +23,19 @@ import (
 func AllyStart(db *models.DB) {
 
   go func() {
+
+    // Start scheduling
+    s := gocron.NewScheduler()
   
     // Lets get started
     services.LogInfo("Cron Ally Started")  
 
     // Setup jobs we need to run 
-    //gocron.Every(1).Second().Do(func () { MarkAlly(db) })
-    gocron.Every(1).Day().At("22:05").Do(func () { MarkAlly(db) })
+    //s.Every(1).Second().Do(func () { MarkAlly(db) })
+    s.Every(1).Day().At("22:02").Do(func () { MarkAlly(db) })
 
     // function Start all the pending jobs
-    <- gocron.Start()
+    <- s.Start()
   
   }()
 
@@ -45,6 +48,9 @@ func AllyStart(db *models.DB) {
 func MarkAlly(db *models.DB) error {
 
   var targetAccountId uint = 0
+
+  // Log
+  services.LogInfo("Ally starting account marked from cron")
 
   // Get accounts in our system
   accounts := db.GetAllAcounts()

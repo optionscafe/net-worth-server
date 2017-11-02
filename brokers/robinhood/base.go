@@ -4,22 +4,22 @@
 // Copyright: 2017 Cloudmanic Labs, LLC. All rights reserved.
 //
 
-package tradier
+package robinhood
 
 import (
   "os"
   "fmt"
   "errors"
   "net/http"
-  "io/ioutil" 
+  "io/ioutil"
 )
 
 const (
-  apiBaseUrl = "https://api.tradier.com/v1"
+  apiBaseUrl = "https://api.robinhood.com"
 )
 
 //
-// Send a GET request to Tradier. Returns the JSON string or an error
+// Send a GET request to Robinhood. Returns the JSON string or an error
 //
 func SendGetRequest(urlStr string) (string, error) {
   
@@ -29,7 +29,7 @@ func SendGetRequest(urlStr string) (string, error) {
   // Setup api request
   req, _ := http.NewRequest("GET", apiBaseUrl + urlStr, nil)
   req.Header.Set("Accept", "application/json")
-  req.Header.Set("Authorization", fmt.Sprint("Bearer ", os.Getenv("TRADIER_ACCESS_TOKEN")))   
+  req.Header.Set("Authorization", fmt.Sprint("Token ", os.Getenv("ROBINHOOD_ACCESS_TOKEN")))   
  
   res, err := client.Do(req)
       

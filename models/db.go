@@ -114,18 +114,21 @@ func LoadTestingData(db *gorm.DB) {
   db.Create(&Account{ Name: "Tradier", Balance: 14678.33, Units: 14678.33, AccountNumber: "7af234fS" })
   db.Create(&Account{ Name: "Ally", Balance: 85345.33, Units: 85345.33, AccountNumber: "23423499" })
   db.Create(&Account{ Name: "Lending Club", Balance: 5000.00, Units: 5000.00, AccountNumber: "1238888" })  
+  db.Create(&Account{ Name: "Robinhood", Balance: 4501.02, Units: 4501.02, AccountNumber: "72294Daf33" })
 
   // Add Account Units
   db.Exec("TRUNCATE TABLE account_units;")  
   db.Create(&AccountUnits{ AccountId: 1, Date: ts, Amount: 14678.33, Units: 14678.33, PricePer: 1.00, Note: "Test Note #1" })
-  db.Create(&AccountUnits{ AccountId: 2, Date: ts, Amount: 85345.33, Units: 85345.33, PricePer: 1.00, Note: "Test Note #1" })
-  db.Create(&AccountUnits{ AccountId: 3, Date: ts, Amount: 5000.00, Units: 5000.00, PricePer: 1.00, Note: "Test Note #1" })  
+  db.Create(&AccountUnits{ AccountId: 2, Date: ts, Amount: 85345.33, Units: 85345.33, PricePer: 1.00, Note: "Test Note #2" })
+  db.Create(&AccountUnits{ AccountId: 3, Date: ts, Amount: 5000.00, Units: 5000.00, PricePer: 1.00, Note: "Test Note #3" })  
+  db.Create(&AccountUnits{ AccountId: 4, Date: ts, Amount: 4501.02, Units: 4501.02, PricePer: 1.00, Note: "Test Note #4" })
 
   // Add Account Marks
   db.Exec("TRUNCATE TABLE account_marks;")
   db.Create(&AccountMarks{ Date: ts, AccountId: 1, Units: 14678.33, PricePer: 1.00, Balance: 14678.33 })
   db.Create(&AccountMarks{ Date: ts, AccountId: 2, Units: 85345.33, PricePer: 1.00, Balance: 85345.33 })
   db.Create(&AccountMarks{ Date: ts, AccountId: 3, Units: 5000.00, PricePer: 1.00, Balance: 5000.00 })  
+  db.Create(&AccountMarks{ Date: ts, AccountId: 4, Units: 4501.02, PricePer: 1.00, Balance: 4501.02 })
 
   // Ledger Categories
   db.Exec("TRUNCATE TABLE ledger_categories;")  

@@ -23,16 +23,19 @@ import (
 func TradierStart(db *models.DB) {
 
   go func() {
+
+    // Start scheduling
+    s := gocron.NewScheduler()    
   
     // Lets get started
     services.LogInfo("Cron Tradier Started")  
 
     // Setup jobs we need to run 
-    //gocron.Every(1).Second().Do(func () { MarkTradier(db) })
-    gocron.Every(1).Day().At("22:00").Do(func () { MarkTradier(db) })
+    //s.Every(1).Second().Do(func () { MarkTradier(db) })
+    s.Every(1).Day().At("22:00").Do(func () { MarkTradier(db) })
 
     // function Start all the pending jobs
-    <- gocron.Start()
+    <- s.Start()
   
   }()
 
@@ -45,6 +48,9 @@ func TradierStart(db *models.DB) {
 func MarkTradier(db *models.DB) error {
 
   var targetAccountId uint = 0
+
+  // Log
+  services.LogInfo("Tradier starting account marked from cron")  
 
   // Get accounts in our system
   accounts := db.GetAllAcounts()
