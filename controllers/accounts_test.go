@@ -12,6 +12,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/gorilla/mux"
 	env "github.com/jpfuentes2/go-env"
 	"github.com/net-worth-server/models"
 	"github.com/tidwall/gjson"
@@ -37,10 +38,14 @@ func TestAccountManageFunds(t *testing.T) {
 	var postStr = []byte(`{"amount":500.12, "date": "2017-11-12", "note": "Test Note from TestAccountManageFunds"}`)
 
 	// Make a mock request.
-	rec := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/api/v1/accounts/1/funds", bytes.NewBuffer(postStr))
 	req.Header.Set("Accept", "application/json")
-	http.HandlerFunc(c.AccountManageFunds).ServeHTTP(rec, req)
+
+	// Setup writer.
+	rec := httptest.NewRecorder()
+	r := mux.NewRouter()
+	r.HandleFunc("/api/v1/accounts/{id}/funds", c.AccountManageFunds)
+	r.ServeHTTP(rec, req)
 
 	// Parse json that returned.
 	units := gjson.Get(rec.Body.String(), "units").Float()

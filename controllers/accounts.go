@@ -7,7 +7,6 @@
 package controllers
 
 import (
-	"flag"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -166,12 +165,6 @@ func (t *Controller) AccountManageFunds(w http.ResponseWriter, r *http.Request) 
 	note := gjson.Get(string(body), "note").String()
 
 	vars := mux.Vars(r)
-
-	// Hack for testing.
-	if flag.Lookup("test.v") != nil {
-		vars = make(map[string]string)
-		vars["id"] = "1"
-	}
 
 	// Convert string to int.
 	id, err := strconv.ParseUint(vars["id"], 10, 32)
