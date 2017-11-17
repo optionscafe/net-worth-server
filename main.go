@@ -12,8 +12,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/gorilla/handlers"
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 	_ "github.com/jpfuentes2/go-env/autoload"
 	"github.com/net-worth-server/controllers"
 	"github.com/net-worth-server/cron"
@@ -44,34 +43,35 @@ func main() {
 	// Startup controller
 	c := &controllers.Controller{DB: db}
 
+	// Set GIN Settings
+	gin.SetMode("release")
+	gin.DisableConsoleColor()
+
 	// Set Router
-	r := mux.NewRouter()
+	//r := mux.NewRouter()
+	r := gin.Default()
+
+	// Auth middleware
+	r.Use(c.AuthMiddleware())
 
 	// Mark routes
-	r.HandleFunc("/api/v1/marks", c.GetMarks).Methods("GET")
+	r.GET("/api/v1/marks", c.GetMarks)
 
 	// Ledgers routes
-	r.HandleFunc("/api/v1/ledgers", c.GetLedgers).Methods("GET")
-	r.HandleFunc("/api/v1/ledgers", c.CreateLedger).Methods("POST")
+	r.GET("/api/v1/ledgers", c.GetLedgers)
+	r.POST("/api/v1/ledgers", c.CreateLedger)
 
 	// Account routes
-	r.HandleFunc("/api/v1/accounts", c.GetAccounts).Methods("GET")
-	r.HandleFunc("/api/v1/accounts", c.CreateAccount).Methods("POST")
-	r.HandleFunc("/api/v1/accounts/{id}", c.GetAccount).Methods("GET")
-	r.HandleFunc("/api/v1/accounts/{id}/marks", c.GetAccountMarks).Methods("GET")
-	r.HandleFunc("/api/v1/accounts/{id}/marks", c.CreateAccountMark).Methods("POST")
-	r.HandleFunc("/api/v1/accounts/{id}/funds", c.AccountManageFunds).Methods("POST")
-
-	// Setup handler
-	var handler = c.AuthMiddleware(r)
-
-	if os.Getenv("LOG_REQUESTS") == "true" {
-		handler = handlers.CombinedLoggingHandler(os.Stdout, c.AuthMiddleware(r))
-	}
+	r.GET("/api/v1/accounts", c.GetAccounts)
+	r.POST("/api/v1/accounts", c.CreateAccount)
+	r.GET("/api/v1/accounts/:id", c.GetAccount)
+	r.GET("/api/v1/accounts/:id/marks", c.GetAccountMarks)
+	r.POST("/api/v1/accounts/:id/marks", c.CreateAccountMark)
+	r.POST("/api/v1/accounts/:id/funds", c.AccountManageFunds)
 
 	// Setup http server
 	srv := &http.Server{
-		Handler:      handler,
+		Handler:      r,
 		Addr:         ":" + os.Getenv("HTTP_PORT"),
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,

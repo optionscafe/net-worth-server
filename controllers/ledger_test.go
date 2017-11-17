@@ -11,6 +11,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	"github.com/jpfuentes2/go-env"
 	"github.com/net-worth-server/models"
 	"github.com/tidwall/gjson"
@@ -37,13 +38,19 @@ func TestGetLedgers(t *testing.T) {
 	expectedAmounts := []float64{55.45, 1155.45, 155.45, 455}
 	expectedNotes := []string{"1st ledger test.", "2nd ledger test.", "3rd ledger test.", "4th ledger test."}
 
-	// Make a mock request.
-	rec := httptest.NewRecorder()
+	// Setup request
 	req, _ := http.NewRequest("GET", "/api/v1/ledgers", nil)
-	http.HandlerFunc(c.GetLedgers).ServeHTTP(rec, req)
+
+	// Setup writer.
+	w := httptest.NewRecorder()
+	gin.SetMode("release")
+	gin.DisableConsoleColor()
+	r := gin.New()
+	r.GET("/api/v1/ledgers", c.GetLedgers)
+	r.ServeHTTP(w, req)
 
 	// Parse json that returned.
-	result := gjson.Parse(rec.Body.String())
+	result := gjson.Parse(w.Body.String())
 
 	// Index each loop
 	loop := 0

@@ -9,10 +9,9 @@ package controllers
 import (
 	"io/ioutil"
 	"net/http"
-	"strconv"
 	"time"
 
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 	"github.com/net-worth-server/models"
 	"github.com/tidwall/gjson"
 )
@@ -22,10 +21,10 @@ import (
 //
 // curl -H "Authorization: Bearer XXXXX" http://localhost:9090/api/v1/accounts
 //
-func (t *Controller) GetAccounts(w http.ResponseWriter, r *http.Request) {
+func (t *Controller) GetAccounts(c *gin.Context) {
 
 	// Return Happy
-	t.RespondJSON(w, http.StatusOK, t.DB.GetAllAcounts())
+	c.JSON(http.StatusOK, t.DB.GetAllAcounts())
 }
 
 //
@@ -33,26 +32,16 @@ func (t *Controller) GetAccounts(w http.ResponseWriter, r *http.Request) {
 //
 // curl -H "Authorization: Bearer XXXXX" http://localhost:9090/api/v1/accounts/1
 //
-func (t *Controller) GetAccount(w http.ResponseWriter, r *http.Request) {
-
-	vars := mux.Vars(r)
-
-	// Convert string to int.
-	id, err := strconv.ParseUint(vars["id"], 10, 32)
-
-	if err != nil {
-		t.RespondError(w, http.StatusBadRequest, "Something went wrong please email support")
-		return
-	}
+func (t *Controller) GetAccount(c *gin.Context) {
 
 	// Get the account by id.
-	account, err := t.DB.GetAccountById(uint(id))
+	account, err := t.DB.GetAccountById(t.ConvertUrlParamToUint("id", c))
 
 	// Return json based on if this was a good result or not.
 	if err != nil {
-		t.RespondError(w, http.StatusNotFound, err.Error())
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	} else {
-		t.RespondJSON(w, http.StatusOK, account)
+		c.JSON(http.StatusOK, account)
 	}
 }
 
@@ -61,23 +50,23 @@ func (t *Controller) GetAccount(w http.ResponseWriter, r *http.Request) {
 //
 // curl -H "Content-Type: application/json" -X POST -d '{"name":"Lending Club","balance":70123.66}' -H "Authorization: Bearer XXXXXX" http://localhost:9090/api/v1/accounts
 //
-func (t *Controller) CreateAccount(w http.ResponseWriter, r *http.Request) {
+func (t *Controller) CreateAccount(c *gin.Context) {
 
 	account := models.Account{}
 
 	// Decode the json we posted in.
-	if err := t.DecodePostedJson(&account, w, r); err != nil {
-		t.RespondError(w, http.StatusBadRequest, err.Error())
+	if err := t.DecodePostedJson(&account, c.Writer, c.Request); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	// Store in database & return json.
 	if err := t.DB.CreateAccount(&account); err != nil {
-		t.RespondError(w, http.StatusBadRequest, err.Error())
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 	} else {
 		// Get fresh account because of timezone issues, and add in all the other magic.
 		account, _ := t.DB.GetAccountById(account.Id)
-		t.RespondJSON(w, http.StatusCreated, account)
+		c.JSON(http.StatusCreated, account)
 	}
 }
 
@@ -86,20 +75,10 @@ func (t *Controller) CreateAccount(w http.ResponseWriter, r *http.Request) {
 //
 // curl -H "Authorization: Bearer XXXXX" http://localhost:9090/api/v1/accounts/XX/marks
 //
-func (t *Controller) GetAccountMarks(w http.ResponseWriter, r *http.Request) {
-
-	vars := mux.Vars(r)
-
-	// Convert string to int.
-	id, err := strconv.ParseUint(vars["id"], 10, 32)
-
-	if err != nil {
-		t.RespondError(w, http.StatusBadRequest, "Something went wrong please email support")
-		return
-	}
+func (t *Controller) GetAccountMarks(c *gin.Context) {
 
 	// Return Happy
-	t.RespondJSON(w, http.StatusOK, t.DB.GetMarksByAccountById(uint(id)))
+	c.JSON(http.StatusOK, t.DB.GetMarksByAccountById(t.ConvertUrlParamToUint("id", c)))
 }
 
 //
@@ -107,47 +86,37 @@ func (t *Controller) GetAccountMarks(w http.ResponseWriter, r *http.Request) {
 //
 // curl -H "Content-Type: application/json" -X POST -d '{"balance":1000.00, "date": "2017-10-05"}' -H "Authorization: Bearer XXXXXX" http://localhost:9090/api/v1/accounts/XX/marks
 //
-func (t *Controller) CreateAccountMark(w http.ResponseWriter, r *http.Request) {
+func (t *Controller) CreateAccountMark(c *gin.Context) {
 
 	// Grab date for late formatting.
-	body, _ := ioutil.ReadAll(r.Body)
+	id := t.ConvertUrlParamToUint("id", c)
+	body, _ := ioutil.ReadAll(c.Request.Body)
 	date := gjson.Get(string(body), "date").String()
 	balance := gjson.Get(string(body), "balance").Float()
-
-	// URL vars
-	vars := mux.Vars(r)
-
-	// Convert string to int.
-	id, err := strconv.ParseUint(vars["id"], 10, 32)
-
-	if err != nil {
-		t.RespondError(w, http.StatusBadRequest, "Something went wrong please email support")
-		return
-	}
 
 	// Reformat date.
 	pDate, err := time.Parse("2006-01-02", date)
 
 	if err != nil {
-		t.RespondError(w, http.StatusBadRequest, "Unable to parse date.")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Unable to parse date."})
 		return
 	}
 
 	// Store in database & return json.
-	err = t.DB.MarkAccountByDate(uint(id), pDate.UTC(), balance)
+	err = t.DB.MarkAccountByDate(id, pDate.UTC(), balance)
 
 	if err != nil {
-		t.RespondError(w, http.StatusBadRequest, "Something went wrong please email support")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Something went wrong please email support"})
 		return
 	}
 
 	// Get the account by id.
-	account, err := t.DB.GetAccountById(uint(id))
+	account, err := t.DB.GetAccountById(id)
 
 	if err != nil {
-		t.RespondError(w, http.StatusBadRequest, err.Error())
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	} else {
-		t.RespondJSON(w, http.StatusCreated, account)
+		c.JSON(http.StatusCreated, account)
 	}
 }
 
@@ -157,41 +126,32 @@ func (t *Controller) CreateAccountMark(w http.ResponseWriter, r *http.Request) {
 //
 // curl -H "Content-Type: application/json" -X POST -d '{"amount":500.12, "date": "2017-11-12", "note": "Test note."}' -H "Authorization: Bearer XXXXXX" http://localhost:9090/api/v1/accounts/XX/funds
 //
-func (t *Controller) AccountManageFunds(w http.ResponseWriter, r *http.Request) {
+func (t *Controller) AccountManageFunds(c *gin.Context) {
 
-	body, _ := ioutil.ReadAll(r.Body)
+	id := t.ConvertUrlParamToUint("id", c)
+	body, _ := ioutil.ReadAll(c.Request.Body)
 	date := gjson.Get(string(body), "date").String()
 	amount := gjson.Get(string(body), "amount").Float()
 	note := gjson.Get(string(body), "note").String()
-
-	vars := mux.Vars(r)
-
-	// Convert string to int.
-	id, err := strconv.ParseUint(vars["id"], 10, 32)
-
-	if err != nil {
-		t.RespondError(w, http.StatusBadRequest, "Something went wrong please email support")
-		return
-	}
 
 	// Reformat date.
 	pDate, err := time.Parse("2006-01-02", date)
 
 	if err != nil {
-		t.RespondError(w, http.StatusBadRequest, "Unable to parse date.")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Unable to parse date."})
 		return
 	}
 
 	// Add / Subtract money to an account units
-	t.DB.AccountUnitsAddFunds(uint(id), pDate, amount, note)
+	t.DB.AccountUnitsAddFunds(id, pDate, amount, note)
 
 	// Get the account by id.
-	account, err := t.DB.GetAccountById(uint(id))
+	account, err := t.DB.GetAccountById(id)
 
 	if err != nil {
-		t.RespondError(w, http.StatusBadRequest, err.Error())
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 	} else {
-		t.RespondJSON(w, http.StatusCreated, account)
+		c.JSON(http.StatusCreated, account)
 	}
 }
 

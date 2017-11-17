@@ -7,42 +7,43 @@
 package models
 
 import (
-  "time"
-  "errors"
-  "github.com/net-worth-server/services"  
+	"errors"
+	"time"
+
+	"github.com/net-worth-server/services"
 )
 
 type Account struct {
-  Id uint `gorm:"primary_key" json:"id"`
-  CreatedAt time.Time `json:"created_at"`
-  UpdatedAt time.Time `json:"updated_at"`
-  Name string `sql:"not null" json:"name"`
-  Balance float64 `sql:"type:DECIMAL(12,2)" json:"balance"`
-  Units float64 `gorm:"-" json:"units"`
-  AccountNumber string `sql:"not null" json:"account_number"`      
-} 
+	Id            uint      `gorm:"primary_key" json:"id"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
+	Name          string    `sql:"not null" json:"name"`
+	Balance       float64   `sql:"type:DECIMAL(12,2)" json:"balance"`
+	Units         float64   `gorm:"-" json:"units"`
+	AccountNumber string    `sql:"not null" json:"account_number"`
+}
 
 //
 // Get all accounts.
 //
 func (db *DB) GetAllAcounts() []Account {
 
-  accounts := []Account{}
+	accounts := []Account{}
 
-  db.Order("name asc").Find(&accounts)
+	db.Order("name asc").Find(&accounts)
 
-  // Struct to capture the sum result.
-  type Result struct {
-    Sum float64
-  }
+	// Struct to capture the sum result.
+	type Result struct {
+		Sum float64
+	}
 
-  // Loop through the accounts and add extra voodoo
-  for key, row := range accounts {
-    accounts[key].Units = db.getUnits(row.Id)
-  }
+	// Loop through the accounts and add extra voodoo
+	for key, row := range accounts {
+		accounts[key].Units = db.getUnits(row.Id)
+	}
 
-  // Return the accounts.
-  return accounts
+	// Return the accounts.
+	return accounts
 }
 
 //
@@ -50,18 +51,18 @@ func (db *DB) GetAllAcounts() []Account {
 //
 func (db *DB) GetAccountById(id uint) (Account, error) {
 
-  account := Account{}
+	account := Account{}
 
-  // Find result or send 404
-  if err := db.First(&account, id).Error; err != nil {
-    return Account{}, err
-  }
+	// Find result or send 404
+	if err := db.First(&account, id).Error; err != nil {
+		return Account{}, err
+	}
 
-  // Add in units.
-  account.Units = db.getUnits(id)
+	// Add in units.
+	account.Units = db.getUnits(id)
 
-  // Return the account.
-  return account, nil
+	// Return the account.
+	return account, nil
 }
 
 //
@@ -69,18 +70,18 @@ func (db *DB) GetAccountById(id uint) (Account, error) {
 //
 func (db *DB) GetAccountByName(name string) (Account, error) {
 
-  account := Account{}
+	account := Account{}
 
-  // Validate to make sure we do not already have this record.
-  if ! db.Where("name = ?", name).First(&account).RecordNotFound() {
-    return Account{}, errors.New("We already have an account with the name " + name)
-  } 
+	// Validate to make sure we do not already have this record.
+	if !db.Where("name = ?", name).First(&account).RecordNotFound() {
+		return Account{}, errors.New("We already have an account with the name " + name)
+	}
 
-  // Add in units.
-  account.Units = db.getUnits(account.Id)
+	// Add in units.
+	account.Units = db.getUnits(account.Id)
 
-  // Return the account.
-  return account, nil
+	// Return the account.
+	return account, nil
 }
 
 //
@@ -88,38 +89,38 @@ func (db *DB) GetAccountByName(name string) (Account, error) {
 //
 func (db *DB) CreateAccount(account *Account) error {
 
-  // Validate to make sure we do not already have this record.
-  _, err := db.GetAccountByName(account.Name)
+	// Validate to make sure we do not already have this record.
+	_, err := db.GetAccountByName(account.Name)
 
-  if err != nil {
-    return err
-  }
+	if err != nil {
+		return err
+	}
 
-  // Install the units based on the balance we passed in. - WE have to do this before creation
-  db.AddUnits(time.Now(), account.Balance, "Account Opening - " + account.Name) 
+	// Install the units based on the balance we passed in. - WE have to do this before creation
+	db.AddUnits(time.Now(), account.Balance, "Account Opening - "+account.Name)
 
-  // Store in database.
-  if err :=  db.Create(account).Error; err != nil {
-    return err
-  }  
+	// Store in database.
+	if err := db.Create(account).Error; err != nil {
+		return err
+	}
 
-  // When we create our units are one unit per dollar lets map the units with the dollars  
-  db.Create(&AccountUnits{ AccountId: account.Id, Date: time.Now(), Amount: account.Balance, Units: account.Balance, PricePer: 1.00, Note: "Account Opening - " + account.Name })  
+	// When we create our units are one unit per dollar lets map the units with the dollars
+	db.Create(&AccountUnits{AccountId: account.Id, Date: time.Now(), Amount: account.Balance, Units: account.Balance, PricePer: 1.00, Note: "Account Opening - " + account.Name})
 
-  // Mark the value of the account as of today.  
-  db.Create(&AccountMarks{ Date: time.Now(), AccountId: account.Id, Balance: account.Balance })  
+	// Mark the value of the account as of today.
+	db.Create(&AccountMarks{Date: time.Now(), AccountId: account.Id, Balance: account.Balance})
 
-  // Add in units.
-  account.Units = db.getUnits(account.Id)
+	// Add in units.
+	account.Units = db.getUnits(account.Id)
 
-  // Mark
-  db.MarkByDate(time.Now())  
+	// Mark
+	db.MarkByDate(time.Now())
 
-  // Log
-  services.LogDebug("Created new accounts - " + account.Name)
+	// Log
+	services.LogDebug("Created new accounts - " + account.Name)
 
-  // Return happy.
-  return nil
+	// Return happy.
+	return nil
 }
 
 //
@@ -127,18 +128,18 @@ func (db *DB) CreateAccount(account *Account) error {
 //
 func (db *DB) getUnits(id uint) float64 {
 
-  // Struct to capture the sum result.
-  type Result struct {
-    Sum float64
-  }
+	// Struct to capture the sum result.
+	type Result struct {
+		Sum float64
+	}
 
-  var u Result
+	var u Result
 
-  // Query and get unit count.
-  db.Raw("SELECT SUM(units) AS sum FROM account_units WHERE account_id = ?", id).Scan(&u)
+	// Query and get unit count.
+	db.Raw("SELECT SUM(units) AS sum FROM account_units WHERE account_id = ?", id).Scan(&u)
 
-  // Return count
-  return u.Sum
+	// Return count
+	return u.Sum
 }
 
 //
@@ -146,33 +147,33 @@ func (db *DB) getUnits(id uint) float64 {
 //
 func (db *DB) GetAccountsPricePerUnit() float64 {
 
-  total := db.GetAccountsTotalBalance()
-  totalShares := db.GetUnitsTotalCount()
+	total := db.GetAccountsTotalBalance()
+	totalShares := db.GetUnitsTotalCount()
 
-  if totalShares <= 0 {
-    return 0.00
-  }
+	if totalShares <= 0 {
+		return 0.00
+	}
 
-  return total / totalShares
+	return total / totalShares
 }
 
 //
-// Get the balance of all accounts. 
+// Get the balance of all accounts.
 //
 func (db *DB) GetAccountsTotalBalance() float64 {
 
-  // Struct to capture the sum result.
-  type Result struct {
-    Sum float64
-  }
+	// Struct to capture the sum result.
+	type Result struct {
+		Sum float64
+	}
 
-  var u Result
+	var u Result
 
-  // Query and get unit count.
-  db.Raw("SELECT SUM(balance) AS sum FROM accounts").Scan(&u)
+	// Query and get unit count.
+	db.Raw("SELECT SUM(balance) AS sum FROM accounts").Scan(&u)
 
-  // Return count
-  return u.Sum
+	// Return count
+	return u.Sum
 }
 
 /* End File */

@@ -12,7 +12,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 	env "github.com/jpfuentes2/go-env"
 	"github.com/net-worth-server/models"
 	"github.com/tidwall/gjson"
@@ -42,15 +42,17 @@ func TestAccountManageFunds(t *testing.T) {
 	req.Header.Set("Accept", "application/json")
 
 	// Setup writer.
-	rec := httptest.NewRecorder()
-	r := mux.NewRouter()
-	r.HandleFunc("/api/v1/accounts/{id}/funds", c.AccountManageFunds)
-	r.ServeHTTP(rec, req)
+	w := httptest.NewRecorder()
+	gin.SetMode("release")
+	gin.DisableConsoleColor()
+	r := gin.New()
+	r.POST("/api/v1/accounts/:id/funds", c.AccountManageFunds)
+	r.ServeHTTP(w, req)
 
 	// Parse json that returned.
-	units := gjson.Get(rec.Body.String(), "units").Float()
-	balance := gjson.Get(rec.Body.String(), "balance").Float()
-	accountNumber := gjson.Get(rec.Body.String(), "account_number").String()
+	units := gjson.Get(w.Body.String(), "units").Float()
+	balance := gjson.Get(w.Body.String(), "balance").Float()
+	accountNumber := gjson.Get(w.Body.String(), "account_number").String()
 
 	// Test accountNumber.
 	if accountNumber != "7af234fS" {

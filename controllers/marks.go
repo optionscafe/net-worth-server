@@ -7,7 +7,9 @@
 package controllers
 
 import (
-  "net/http"
+	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 //
@@ -15,10 +17,10 @@ import (
 //
 // curl -H "Authorization: Bearer XXXXX" http://localhost:9090/api/v1/marks
 //
-func (t *Controller) GetMarks(w http.ResponseWriter, r *http.Request) {
+func (t *Controller) GetMarks(c *gin.Context) {
 
-  // Return Happy
-  t.RespondJSON(w, http.StatusOK, t.DB.GetAllMarks())
+	// Return Happy
+	c.JSON(http.StatusOK, t.DB.GetAllMarks())
 }
 
 /* End File */
