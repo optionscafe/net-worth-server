@@ -14,10 +14,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/jpfuentes2/go-env/autoload"
-	"github.com/net-worth-server/controllers"
-	"github.com/net-worth-server/cron"
-	"github.com/net-worth-server/models"
-	"github.com/net-worth-server/services"
+	"github.com/optionscafe/net-worth-server/controllers"
+	"github.com/optionscafe/net-worth-server/cron"
+	"github.com/optionscafe/net-worth-server/models"
+	"github.com/optionscafe/net-worth-server/services"
 )
 
 //
