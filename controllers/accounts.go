@@ -35,7 +35,7 @@ func (t *Controller) GetAccounts(c *gin.Context) {
 func (t *Controller) GetAccount(c *gin.Context) {
 
 	// Get the account by id.
-	account, err := t.DB.GetAccountById(t.ConvertUrlParamToUint("id", c))
+	account, err := t.DB.GetAccountById(c.MustGet("id").(uint))
 
 	// Return json based on if this was a good result or not.
 	if err != nil {
@@ -78,7 +78,7 @@ func (t *Controller) CreateAccount(c *gin.Context) {
 func (t *Controller) GetAccountMarks(c *gin.Context) {
 
 	// Return Happy
-	c.JSON(http.StatusOK, t.DB.GetMarksByAccountById(t.ConvertUrlParamToUint("id", c)))
+	c.JSON(http.StatusOK, t.DB.GetMarksByAccountById(c.MustGet("id").(uint)))
 }
 
 //
@@ -89,7 +89,7 @@ func (t *Controller) GetAccountMarks(c *gin.Context) {
 func (t *Controller) CreateAccountMark(c *gin.Context) {
 
 	// Grab date for late formatting.
-	id := t.ConvertUrlParamToUint("id", c)
+	id := c.MustGet("id").(uint)
 	body, _ := ioutil.ReadAll(c.Request.Body)
 	date := gjson.Get(string(body), "date").String()
 	balance := gjson.Get(string(body), "balance").Float()
@@ -128,7 +128,7 @@ func (t *Controller) CreateAccountMark(c *gin.Context) {
 //
 func (t *Controller) AccountManageFunds(c *gin.Context) {
 
-	id := t.ConvertUrlParamToUint("id", c)
+	id := c.MustGet("id").(uint)
 	body, _ := ioutil.ReadAll(c.Request.Body)
 	date := gjson.Get(string(body), "date").String()
 	amount := gjson.Get(string(body), "amount").Float()

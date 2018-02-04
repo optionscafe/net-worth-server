@@ -53,6 +53,7 @@ func main() {
 
 	// Auth middleware
 	r.Use(c.AuthMiddleware())
+	r.Use(c.ParamValidateMiddleware())
 
 	// Mark routes
 	r.GET("/api/v1/marks", c.GetMarks)
