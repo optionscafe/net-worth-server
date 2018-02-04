@@ -10,7 +10,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/net-worth-server/models"
+	"github.com/optionscafe/net-worth-server/models"
 )
 
 type Controller struct {

@@ -7,14 +7,14 @@
 package cron
 
 import (
-  "os"
-  "time"
-  "errors"
-  "net/http"  
-  "github.com/jasonlvhit/gocron" 
-  "github.com/net-worth-server/models"
-  "github.com/net-worth-server/services"    
-  "github.com/net-worth-server/brokers/robinhood"
+	"errors"
+	"github.com/jasonlvhit/gocron"
+	"github.com/optionscafe/net-worth-server/brokers/robinhood"
+	"github.com/optionscafe/net-worth-server/models"
+	"github.com/optionscafe/net-worth-server/services"
+	"net/http"
+	"os"
+	"time"
 )
 
 //
@@ -22,22 +22,22 @@ import (
 //
 func RobinhoodStart(db *models.DB) {
 
-  go func() {
-  
-    // Start scheduling
-    s := gocron.NewScheduler()
+	go func() {
 
-    // Lets get started
-    services.LogInfo("Cron Robinhood Started")  
+		// Start scheduling
+		s := gocron.NewScheduler()
 
-    // Setup jobs we need to run 
-    //s.Every(1).Second().Do(func () { MarkRobinhood(db) })
-    s.Every(1).Day().At("22:01").Do(func () { MarkRobinhood(db) })
+		// Lets get started
+		services.LogInfo("Cron Robinhood Started")
 
-    // function Start all the pending jobs
-    <- s.Start()
-  
-  }()
+		// Setup jobs we need to run
+		//s.Every(1).Second().Do(func () { MarkRobinhood(db) })
+		s.Every(1).Day().At("22:01").Do(func() { MarkRobinhood(db) })
+
+		// function Start all the pending jobs
+		<-s.Start()
+
+	}()
 
 }
 
@@ -47,58 +47,58 @@ func RobinhoodStart(db *models.DB) {
 //
 func MarkRobinhood(db *models.DB) error {
 
-  var targetAccountId uint = 0
+	var targetAccountId uint = 0
 
-  // Log
-  services.LogInfo("Robinhood starting account marked from cron")
+	// Log
+	services.LogInfo("Robinhood starting account marked from cron")
 
-  // Get accounts in our system
-  accounts := db.GetAllAcounts()
+	// Get accounts in our system
+	accounts := db.GetAllAcounts()
 
-  // Loop through and find the account Id
-  for _, row := range accounts {
-    if row.AccountNumber == os.Getenv("ROBINHOOD_ACCOUNT") {
-      targetAccountId = row.Id   
-    }
-  }
+	// Loop through and find the account Id
+	for _, row := range accounts {
+		if row.AccountNumber == os.Getenv("ROBINHOOD_ACCOUNT") {
+			targetAccountId = row.Id
+		}
+	}
 
-  // Make sure we found an account
-  if targetAccountId == 0 {
-    return errors.New("No account found - " + os.Getenv("ROBINHOOD_ACCOUNT"))
-  }
+	// Make sure we found an account
+	if targetAccountId == 0 {
+		return errors.New("No account found - " + os.Getenv("ROBINHOOD_ACCOUNT"))
+	}
 
-  // Get all the balances from Robinhood.
-  balance, err := robinhood.GetBalances()
+	// Get all the balances from Robinhood.
+	balance, err := robinhood.GetBalances()
 
-  if err != nil {
-    return err
-  } 
+	if err != nil {
+		return err
+	}
 
-  // Format the date for today.
-  ts := time.Now()
-  date := time.Date(ts.Year(), ts.Month(), ts.Day(), 0, 0, 0, 0, time.UTC)
+	// Format the date for today.
+	ts := time.Now()
+	date := time.Date(ts.Year(), ts.Month(), ts.Day(), 0, 0, 0, 0, time.UTC)
 
-  // Process the Marked data.
-  processMarkRobinhood(db, balance, targetAccountId, date)
+	// Process the Marked data.
+	processMarkRobinhood(db, balance, targetAccountId, date)
 
-  // Send health check notice.
-  if len(os.Getenv("HEALTH_CHECK_ROBINHOOD_URL")) > 0 {
+	// Send health check notice.
+	if len(os.Getenv("HEALTH_CHECK_ROBINHOOD_URL")) > 0 {
 
-    resp, err := http.Get(os.Getenv("HEALTH_CHECK_ROBINHOOD_URL"))
-    
-    if err != nil {
-      services.LogError(err, "Could send HEALTH_CHECK_ROBINHOOD_URL health check - " + os.Getenv("HEALTH_CHECK_ROBINHOOD_URL"))
-    }
-    
-    defer resp.Body.Close()
-    
-  }
+		resp, err := http.Get(os.Getenv("HEALTH_CHECK_ROBINHOOD_URL"))
 
-  // Log
-  services.LogInfo("Robinhood account marked from cron")
+		if err != nil {
+			services.LogError(err, "Could send HEALTH_CHECK_ROBINHOOD_URL health check - "+os.Getenv("HEALTH_CHECK_ROBINHOOD_URL"))
+		}
 
-  // Return happy
-  return nil
+		defer resp.Body.Close()
+
+	}
+
+	// Log
+	services.LogInfo("Robinhood account marked from cron")
+
+	// Return happy
+	return nil
 }
 
 //
@@ -106,11 +106,11 @@ func MarkRobinhood(db *models.DB) error {
 //
 func processMarkRobinhood(db *models.DB, balance robinhood.Balance, targetAccountId uint, date time.Time) error {
 
-  // Mark asset
-  db.MarkAccountByDate(targetAccountId, date, balance.AccountValue)
+	// Mark asset
+	db.MarkAccountByDate(targetAccountId, date, balance.AccountValue)
 
-  // Return happy
-  return nil
+	// Return happy
+	return nil
 }
 
 /* End File */

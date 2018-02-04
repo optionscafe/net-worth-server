@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/net-worth-server/models"
+	"github.com/optionscafe/net-worth-server/models"
 	"github.com/tidwall/gjson"
 )
 

@@ -7,14 +7,14 @@
 package cron
 
 import (
-  "os"
-  "time"
-  "errors"
-  "net/http"  
-  "github.com/jasonlvhit/gocron" 
-  "github.com/net-worth-server/models"
-  "github.com/net-worth-server/services"    
-  "github.com/net-worth-server/brokers/tradier"
+	"errors"
+	"github.com/jasonlvhit/gocron"
+	"github.com/optionscafe/net-worth-server/brokers/tradier"
+	"github.com/optionscafe/net-worth-server/models"
+	"github.com/optionscafe/net-worth-server/services"
+	"net/http"
+	"os"
+	"time"
 )
 
 //
@@ -22,22 +22,22 @@ import (
 //
 func TradierStart(db *models.DB) {
 
-  go func() {
+	go func() {
 
-    // Start scheduling
-    s := gocron.NewScheduler()    
-  
-    // Lets get started
-    services.LogInfo("Cron Tradier Started")  
+		// Start scheduling
+		s := gocron.NewScheduler()
 
-    // Setup jobs we need to run 
-    //s.Every(1).Second().Do(func () { MarkTradier(db) })
-    s.Every(1).Day().At("22:00").Do(func () { MarkTradier(db) })
+		// Lets get started
+		services.LogInfo("Cron Tradier Started")
 
-    // function Start all the pending jobs
-    <- s.Start()
-  
-  }()
+		// Setup jobs we need to run
+		//s.Every(1).Second().Do(func () { MarkTradier(db) })
+		s.Every(1).Day().At("22:00").Do(func() { MarkTradier(db) })
+
+		// function Start all the pending jobs
+		<-s.Start()
+
+	}()
 
 }
 
@@ -47,58 +47,58 @@ func TradierStart(db *models.DB) {
 //
 func MarkTradier(db *models.DB) error {
 
-  var targetAccountId uint = 0
+	var targetAccountId uint = 0
 
-  // Log
-  services.LogInfo("Tradier starting account marked from cron")  
+	// Log
+	services.LogInfo("Tradier starting account marked from cron")
 
-  // Get accounts in our system
-  accounts := db.GetAllAcounts()
+	// Get accounts in our system
+	accounts := db.GetAllAcounts()
 
-  // Loop through and find the account Id
-  for _, row := range accounts {
-    if row.AccountNumber == os.Getenv("TRADIER_ACCOUNT") {
-      targetAccountId = row.Id   
-    }
-  }
+	// Loop through and find the account Id
+	for _, row := range accounts {
+		if row.AccountNumber == os.Getenv("TRADIER_ACCOUNT") {
+			targetAccountId = row.Id
+		}
+	}
 
-  // Make sure we found an account
-  if targetAccountId == 0 {
-    return errors.New("No account found - " + os.Getenv("TRADIER_ACCOUNT"))
-  }
+	// Make sure we found an account
+	if targetAccountId == 0 {
+		return errors.New("No account found - " + os.Getenv("TRADIER_ACCOUNT"))
+	}
 
-  // Get all the balances from Tradier.
-  balances, err := tradier.GetBalances()
+	// Get all the balances from Tradier.
+	balances, err := tradier.GetBalances()
 
-  if err != nil {
-    return err
-  } 
+	if err != nil {
+		return err
+	}
 
-  // Format the date for today.
-  ts := time.Now()
-  date := time.Date(ts.Year(), ts.Month(), ts.Day(), 0, 0, 0, 0, time.UTC)
+	// Format the date for today.
+	ts := time.Now()
+	date := time.Date(ts.Year(), ts.Month(), ts.Day(), 0, 0, 0, 0, time.UTC)
 
-  // Process the Marked data.
-  processMarkTradier(db, balances, targetAccountId, date, os.Getenv("TRADIER_ACCOUNT"))
+	// Process the Marked data.
+	processMarkTradier(db, balances, targetAccountId, date, os.Getenv("TRADIER_ACCOUNT"))
 
-  // Send health check notice.
-  if len(os.Getenv("HEALTH_CHECK_MARKTRADIER_URL")) > 0 {
+	// Send health check notice.
+	if len(os.Getenv("HEALTH_CHECK_MARKTRADIER_URL")) > 0 {
 
-    resp, err := http.Get(os.Getenv("HEALTH_CHECK_MARKTRADIER_URL"))
-    
-    if err != nil {
-      services.LogError(err, "Could send health check - " + os.Getenv("HEALTH_CHECK_MARKTRADIER_URL"))
-    }
-    
-    defer resp.Body.Close()
-    
-  }
+		resp, err := http.Get(os.Getenv("HEALTH_CHECK_MARKTRADIER_URL"))
 
-  // Log
-  services.LogInfo("Tradier account marked from cron")
+		if err != nil {
+			services.LogError(err, "Could send health check - "+os.Getenv("HEALTH_CHECK_MARKTRADIER_URL"))
+		}
 
-  // Return happy
-  return nil
+		defer resp.Body.Close()
+
+	}
+
+	// Log
+	services.LogInfo("Tradier account marked from cron")
+
+	// Return happy
+	return nil
 }
 
 //
@@ -106,19 +106,19 @@ func MarkTradier(db *models.DB) error {
 //
 func processMarkTradier(db *models.DB, balances []tradier.Balance, targetAccountId uint, date time.Time, accountNumber string) error {
 
-  // Loop through the different Tradier accounts.
-  for _, row := range balances {
+	// Loop through the different Tradier accounts.
+	for _, row := range balances {
 
-    // Find the tradier account we are after. Then mark the asset
-    if row.AccountNumber == accountNumber{
-      db.MarkAccountByDate(targetAccountId, date, row.AccountValue)
-      break
-    }
-    
-  }
+		// Find the tradier account we are after. Then mark the asset
+		if row.AccountNumber == accountNumber {
+			db.MarkAccountByDate(targetAccountId, date, row.AccountValue)
+			break
+		}
 
-  // Return happy
-  return nil
+	}
+
+	// Return happy
+	return nil
 }
 
 /* End File */

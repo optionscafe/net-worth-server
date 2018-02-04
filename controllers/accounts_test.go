@@ -14,7 +14,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	env "github.com/jpfuentes2/go-env"
-	"github.com/net-worth-server/models"
+	"github.com/optionscafe/net-worth-server/models"
 	"github.com/tidwall/gjson"
 )
 
