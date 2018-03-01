@@ -7,13 +7,17 @@
 package models
 
 import (
-	"os"
-	//"log"
+	"database/sql/driver"
 	"flag"
+	"fmt"
+	"go/build"
+	"os"
+	"strings"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
+	env "github.com/jpfuentes2/go-env"
 )
 
 // Database interface
@@ -41,7 +45,7 @@ type Datastore interface {
 
 	// Ledgers
 	GetAllLedgers() []Ledger
-	CreateLedger(uint, time.Time, float64, string, string) (*Ledger, error)
+	CreateLedger(uint, Date, float64, string, string) (*Ledger, error)
 
 	// LedgerCategory
 	GetLedgerCategoryById(uint) (LedgerCategory, error)
@@ -55,6 +59,19 @@ type Datastore interface {
 
 type DB struct {
 	*gorm.DB
+}
+
+// Used for date formatting with json conversion.
+type Date struct {
+	time.Time
+}
+
+//
+// Start up the controller.
+//
+func init() {
+	// Helpful for testing
+	env.ReadEnv(build.Default.GOPATH + "/src/github.com/optionscafe/net-worth-server/.env")
 }
 
 //
@@ -110,6 +127,7 @@ func LoadTestingData(db *gorm.DB) {
 
 	// Shared time we use.
 	ts := time.Date(2017, 10, 29, 17, 20, 01, 507451, time.UTC)
+	ds := Date{time.Date(2017, 10, 29, 17, 20, 01, 507451, time.UTC)}
 	totalUnits := 14678.33 + 85345.33 + 5000.00 + 4501.02
 
 	// Accounts
@@ -145,11 +163,54 @@ func LoadTestingData(db *gorm.DB) {
 
 	// Ledgers
 	db.Exec("TRUNCATE TABLE ledgers;")
-	db.Create(&Ledger{AccountId: 1, Date: ts, Amount: 55.45, Note: "1st ledger test.", CategoryId: 1})
-	db.Create(&Ledger{AccountId: 2, Date: ts, Amount: 1155.45, Note: "2nd ledger test.", CategoryId: 2})
-	db.Create(&Ledger{AccountId: 3, Date: ts, Amount: 155.45, Note: "3rd ledger test.", CategoryId: 3})
-	db.Create(&Ledger{AccountId: 4, Date: ts, Amount: 455.00, Note: "4th ledger test.", CategoryId: 1})
+	db.Create(&Ledger{AccountId: 1, Date: ds, Amount: 55.45, Note: "1st ledger test.", CategoryId: 1})
+	db.Create(&Ledger{AccountId: 2, Date: ds, Amount: 1155.45, Note: "2nd ledger test.", CategoryId: 2})
+	db.Create(&Ledger{AccountId: 3, Date: ds, Amount: 155.45, Note: "3rd ledger test.", CategoryId: 3})
+	db.Create(&Ledger{AccountId: 4, Date: ds, Amount: 455.00, Note: "4th ledger test.", CategoryId: 1})
 
+}
+
+//
+// Convert JSON string to a date. Format XXXX-XX-XX
+//
+func (t *Date) UnmarshalJSON(b []byte) error {
+
+	// Remove quotes
+	str := strings.Replace(string(b), "\"", "", -1)
+
+	// Parse string
+	tt, _ := time.Parse("2006-01-02", str)
+
+	// Return UTC
+	*t = Date{tt.UTC()}
+	return nil
+}
+
+//
+// Convert JSON string to a date. Make it so when we create JSON we return this format XXXX-XX-XX
+//
+func (t Date) MarshalJSON() ([]byte, error) {
+	return []byte(fmt.Sprintf("\"%s\"", t.Format("2006-01-02"))), nil
+}
+
+//
+// Format time Date Going into the DB
+//
+func (t Date) Value() (driver.Value, error) {
+	return t.Format("2006-01-02"), nil
+}
+
+//
+// Convert to type Date Coming out of the DB
+//
+func (t *Date) Scan(value interface{}) error {
+
+	// Parse string
+	tt, _ := time.Parse("2006-01-02 03:04:05 -0700 MST", fmt.Sprintf("%s", value))
+
+	// Return UTC
+	*t = Date{tt.UTC()}
+	return nil
 }
 
 /* End File */

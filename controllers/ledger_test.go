@@ -7,15 +7,93 @@
 package controllers
 
 import (
+	"bytes"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jpfuentes2/go-env"
+	"github.com/nbio/st"
 	"github.com/optionscafe/net-worth-server/models"
 	"github.com/tidwall/gjson"
 )
+
+//
+// Test create a ledger. 01
+//
+func TestCreateLedger01(t *testing.T) {
+
+	// Start the db connection.
+	db, _ := models.NewDB()
+	defer db.Close()
+
+	// Create controller
+	c := &Controller{DB: db}
+
+	// Post data
+	var postStr = []byte(`{"date": "2017-10-05","amount":1001.12,"account_id":1,"category_name":"Dividends","note":"This is a test note."}`)
+
+	// Setup request
+	req, _ := http.NewRequest("POST", "/api/v1/ledgers", bytes.NewBuffer(postStr))
+
+	// Setup writer.
+	w := httptest.NewRecorder()
+	gin.SetMode("release")
+	gin.DisableConsoleColor()
+
+	r := gin.New()
+	r.POST("/api/v1/ledgers", c.CreateLedger)
+	r.ServeHTTP(w, req)
+
+	// Grab result and convert to strut
+	result := models.Ledger{}
+	err := json.Unmarshal([]byte(w.Body.String()), &result)
+
+	// Test results
+	st.Expect(t, err, nil)
+	st.Expect(t, result.Id, uint(5))
+	st.Expect(t, result.Date.Format("2006-01-02"), "2017-10-05")
+	st.Expect(t, result.AccountName, "Tradier")
+	st.Expect(t, result.CategoryName, "Dividends")
+	st.Expect(t, result.Amount, 1001.12)
+	st.Expect(t, result.Note, "This is a test note.")
+}
+
+//
+// Test create a ledger. 02 - Test in valid date.
+//
+func TestCreateLedger02(t *testing.T) {
+
+	// Start the db connection.
+	db, _ := models.NewDB()
+	defer db.Close()
+
+	// Create controller
+	c := &Controller{DB: db}
+
+	// Post data
+	var postStr = []byte(`{"date": "10/5/2017","amount":1001.12,"account_id":1,"category_name":"Dividends","note":"This is a test note."}`)
+
+	// Setup request
+	req, _ := http.NewRequest("POST", "/api/v1/ledgers", bytes.NewBuffer(postStr))
+
+	// Setup writer.
+	w := httptest.NewRecorder()
+	gin.SetMode("release")
+	gin.DisableConsoleColor()
+
+	r := gin.New()
+	r.POST("/api/v1/ledgers", c.CreateLedger)
+	r.ServeHTTP(w, req)
+
+	// Get error string
+	errorStr := gjson.Get(w.Body.String(), "errors.date").String()
+
+	// Test results
+	st.Expect(t, errorStr, "Date field must be in XXXX-XX-XX format.")
+}
 
 //
 // Return all ledger items in this system.
@@ -87,7 +165,7 @@ func TestGetLedgers(t *testing.T) {
 		}
 
 		// Test date.
-		if "2017-10-29T00:00:00Z" != date {
+		if "2017-10-29" != date {
 			t.Errorf("\n\n...expected = %v\n\n...obtained = %v\n\n", "2017-10-29T00:00:00Z", date)
 		}
 

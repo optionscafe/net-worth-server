@@ -46,6 +46,8 @@ func TestAccountManageFunds(t *testing.T) {
 	gin.SetMode("release")
 	gin.DisableConsoleColor()
 	r := gin.New()
+	r.Use(func(c *gin.Context) { c.Set("id", uint(1)) })
+
 	r.POST("/api/v1/accounts/:id/funds", c.AccountManageFunds)
 	r.ServeHTTP(w, req)
 
