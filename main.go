@@ -7,13 +7,8 @@
 package main
 
 import (
-	"log"
-	"net/http"
-	"os"
-	"time"
-
-	"github.com/gin-gonic/gin"
 	_ "github.com/jpfuentes2/go-env/autoload"
+	"github.com/optionscafe/net-worth-server/cmd"
 	"github.com/optionscafe/net-worth-server/controllers"
 	"github.com/optionscafe/net-worth-server/cron"
 	"github.com/optionscafe/net-worth-server/models"
@@ -32,6 +27,13 @@ func main() {
 		services.LogFatal(err, "Failed to connect database")
 	}
 
+	// See if this a command. If so run the command and do not start the app.
+	status := cmd.Run(db)
+
+	if status == true {
+		return
+	}
+
 	// Close db when this app dies. (This might be useless)
 	defer db.Close()
 
@@ -43,46 +45,8 @@ func main() {
 	// Startup controller
 	c := &controllers.Controller{DB: db}
 
-	// Set GIN Settings
-	gin.SetMode("release")
-	gin.DisableConsoleColor()
-
-	// Set Router
-	//r := mux.NewRouter()
-	r := gin.Default()
-
-	// Auth middleware
-	r.Use(c.AuthMiddleware())
-	r.Use(c.ParamValidateMiddleware())
-
-	// Mark routes
-	r.GET("/api/v1/marks", c.GetMarks)
-
-	// Ledgers routes
-	r.GET("/api/v1/ledgers", c.GetLedgers)
-	r.POST("/api/v1/ledgers", c.CreateLedger)
-
-	// Account routes
-	r.GET("/api/v1/accounts", c.GetAccounts)
-	r.POST("/api/v1/accounts", c.CreateAccount)
-	r.GET("/api/v1/accounts/:id", c.GetAccount)
-	r.GET("/api/v1/accounts/:id/marks", c.GetAccountMarks)
-	r.POST("/api/v1/accounts/:id/marks", c.CreateAccountMark)
-	r.POST("/api/v1/accounts/:id/funds", c.AccountManageFunds)
-
-	// Setup http server
-	srv := &http.Server{
-		Handler:      r,
-		Addr:         ":" + os.Getenv("HTTP_PORT"),
-		WriteTimeout: 15 * time.Second,
-		ReadTimeout:  15 * time.Second,
-	}
-
-	// Log this start.
-	services.LogInfo("Starting web server on port " + os.Getenv("HTTP_PORT"))
-
-	// Start server and log if fails
-	log.Fatal(srv.ListenAndServe())
+	// Start webserver & controllers
+	c.StartWebServer()
 }
 
 /* End File */

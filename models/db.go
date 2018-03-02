@@ -8,59 +8,12 @@ package models
 
 import (
 	"flag"
-	"go/build"
 	"os"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
-	env "github.com/jpfuentes2/go-env"
 )
-
-// Database interface
-type Datastore interface {
-
-	// Accounts
-	GetAllAcounts() []Account
-	GetAccountById(uint) (Account, error)
-	GetAccountByName(string) (Account, error)
-	CreateAccount(*Account) error
-	GetAccountsTotalBalance() float64
-	GetAccountsPricePerUnit() float64
-
-	// Account Marks
-	MarkAccountByDate(uint, time.Time, float64) error
-	GetMarksByAccountById(uint) []AccountMarks
-	GetMarksByAccountByIdAndDate(uint, time.Time) (AccountMarks, error)
-
-	// Account Units
-	AccountUnitsAddFunds(uint, time.Time, float64, string) error
-
-	// Units
-	AddUnits(time.Time, float64, string) error
-	GetUnitsTotalCount() float64
-
-	// Ledgers
-	GetAllLedgers() []Ledger
-	CreateLedger(uint, Date, float64, string, string) (*Ledger, error)
-
-	// LedgerCategory
-	GetLedgerCategoryById(uint) (LedgerCategory, error)
-
-	// Marks
-	GetAllMarks() []Mark
-	MarkByDate(time.Time) error
-	GetMarkByDate(time.Time) (*Mark, error)
-	GetMarkAccountUnitsByAccountId(uint) float64
-}
-
-//
-// Start up the controller.
-//
-func init() {
-	// Helpful for testing
-	env.ReadEnv(build.Default.GOPATH + "/src/github.com/optionscafe/net-worth-server/.env")
-}
 
 //
 // Setup the db connection.
@@ -93,6 +46,8 @@ func NewDB() (*DB, error) {
 	// Run migrations
 	db.AutoMigrate(&Unit{})
 	db.AutoMigrate(&Mark{})
+	db.AutoMigrate(&User{})
+	db.AutoMigrate(&Session{})
 	db.AutoMigrate(&Ledger{})
 	db.AutoMigrate(&Account{})
 	db.AutoMigrate(&AccountMarks{})
@@ -117,6 +72,15 @@ func LoadTestingData(db *gorm.DB) {
 	ts := time.Date(2017, 10, 29, 17, 20, 01, 507451, time.UTC)
 	ds := Date{time.Date(2017, 10, 29, 17, 20, 01, 507451, time.UTC)}
 	totalUnits := 14678.33 + 85345.33 + 5000.00 + 4501.02
+
+	// Users
+	db.Exec("TRUNCATE TABLE users;")
+	db.Create(&User{FirstName: "Rob", LastName: "Tester", Email: "spicer+robtester@cloudmanic.com"})
+	db.Create(&User{FirstName: "Jane", LastName: "Wells", Email: "spicer+janewells@cloudmanic.com"})
+	db.Create(&User{FirstName: "Bob", LastName: "Rosso", Email: "spicer+bobrosso@cloudmanic.com"})
+
+	// Sessions
+	db.Exec("TRUNCATE TABLE sessions;")
 
 	// Accounts
 	db.Exec("TRUNCATE TABLE accounts;")
