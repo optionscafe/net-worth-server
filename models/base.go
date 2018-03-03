@@ -17,6 +17,16 @@ import (
 // Database interface
 type Datastore interface {
 
+	// Generic database functions
+	CreateNewRecord(model interface{}, params InsertParam) error
+	Count(model interface{}, params QueryParam) (uint, error)
+	Query(model interface{}, params QueryParam) error
+	QueryWithNoFilterCount(model interface{}, params QueryParam) (int, error)
+	GetQueryMetaData(limitCount int, noLimitCount int, params QueryParam) QueryMetaData
+
+	// Applications
+	ValidateClientIdGrantType(clientId string, grantType string) (Application, error)
+
 	// Users
 	UpdateUser(user *User) error
 	GetUserById(id uint) (User, error)
@@ -25,13 +35,13 @@ type Datastore interface {
 	GetUserByEmail(email string) (User, error)
 	ValidateUserLogin(email string, password string) error
 	ValidateCreateUser(first string, last string, email string, password string) error
-	LoginUserByEmailPass(email string, password string, userAgent string, ipAddress string) (User, error)
-	CreateUser(first string, last string, email string, password string, userAgent string, ipAddress string) (User, error)
+	LoginUserByEmailPass(email string, password string, appId uint, userAgent string, ipAddress string) (User, error)
+	CreateUser(first string, last string, email string, password string, appId uint, userAgent string, ipAddress string) (User, error)
 
 	// Sessions
 	UpdateSession(session *Session) error
 	GetByAccessToken(accessToken string) (Session, error)
-	CreateSession(UserId uint, UserAgent string, LastIpAddress string) (Session, error)
+	CreateSession(UserId uint, appId uint, UserAgent string, LastIpAddress string) (Session, error)
 
 	// Accounts
 	GetAllAcounts() []Account

@@ -19,6 +19,7 @@ type Session struct {
 	CreatedAt     time.Time `json:"-"`
 	UpdatedAt     time.Time `json:"-"`
 	UserId        uint      `sql:"not null;index:UserId"  json:"-"`
+	ApplicationId uint      `sql:"not null;index:ApplicationId"  json:"-"`
 	UserAgent     string    `sql:"not null"  json:"-"`
 	AccessToken   string    `sql:"not null"  json:"access_token"`
 	LastIpAddress string    `sql:"not null"  json:"-"`
@@ -52,7 +53,7 @@ func (db *DB) GetByAccessToken(accessToken string) (Session, error) {
 // Create new session. A user can have more than one session. Typically it is one session per browser or device.
 // We return the session object. The big thing here is we create the access token for this session.
 //
-func (db *DB) CreateSession(UserId uint, UserAgent string, LastIpAddress string) (Session, error) {
+func (db *DB) CreateSession(UserId uint, appId uint, UserAgent string, LastIpAddress string) (Session, error) {
 
 	// Create an access token.
 	access_token, err := helpers.GenerateRandomString(50)
@@ -63,7 +64,7 @@ func (db *DB) CreateSession(UserId uint, UserAgent string, LastIpAddress string)
 	}
 
 	// Save the session into the database.
-	session := Session{UserId: UserId, UserAgent: UserAgent, AccessToken: access_token, LastIpAddress: LastIpAddress}
+	session := Session{UserId: UserId, ApplicationId: appId, UserAgent: UserAgent, AccessToken: access_token, LastIpAddress: LastIpAddress}
 	db.Create(&session)
 
 	// Return the session.

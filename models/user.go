@@ -69,7 +69,7 @@ func (db *DB) GetUserByEmail(email string) (User, error) {
 // Login a user in by email and password. The userAgent is a way to marking what device this
 // login request came from. Same with ipAddress.
 //
-func (db *DB) LoginUserByEmailPass(email string, password string, userAgent string, ipAddress string) (User, error) {
+func (db *DB) LoginUserByEmailPass(email string, password string, appId uint, userAgent string, ipAddress string) (User, error) {
 
 	var user User
 
@@ -88,7 +88,7 @@ func (db *DB) LoginUserByEmailPass(email string, password string, userAgent stri
 	}
 
 	// Create a session so we get an access_token
-	session, err := db.CreateSession(user.Id, userAgent, ipAddress)
+	session, err := db.CreateSession(user.Id, appId, userAgent, ipAddress)
 
 	if err != nil {
 		services.Error(err)
@@ -104,7 +104,7 @@ func (db *DB) LoginUserByEmailPass(email string, password string, userAgent stri
 //
 // Create a new user.
 //
-func (db *DB) CreateUser(first string, last string, email string, password string, userAgent string, ipAddress string) (User, error) {
+func (db *DB) CreateUser(first string, last string, email string, password string, appId uint, userAgent string, ipAddress string) (User, error) {
 
 	// Lets do some validation
 	if err := db.ValidateCreateUser(first, last, email, password); err != nil {
@@ -129,16 +129,18 @@ func (db *DB) CreateUser(first string, last string, email string, password strin
 	// Log user creation.
 	services.Info("CreateUser - Created a new user account - " + first + " " + last + " " + email)
 
-	// Create a session so we get an access_token
-	session, err := db.CreateSession(user.Id, userAgent, ipAddress)
+	// Create a session so we get an access_token (if we passed in an appId)
+	if appId > 0 {
+		session, err := db.CreateSession(user.Id, appId, userAgent, ipAddress)
 
-	if err != nil {
-		services.Error(err)
-		return User{}, err
+		if err != nil {
+			services.Error(err)
+			return User{}, err
+		}
+
+		// Add the session to the user object.
+		user.Session = session
 	}
-
-	// Add the session to the user object.
-	user.Session = session
 
 	// Return the user.
 	return user, nil

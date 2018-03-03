@@ -52,6 +52,7 @@ func NewDB() (*DB, error) {
 	db.AutoMigrate(&Account{})
 	db.AutoMigrate(&AccountMarks{})
 	db.AutoMigrate(&AccountUnits{})
+	db.AutoMigrate(&Application{})
 	db.AutoMigrate(&LedgerCategory{})
 
 	// Is this a testing run? If so load testing data.
@@ -73,11 +74,17 @@ func LoadTestingData(db *gorm.DB) {
 	ds := Date{time.Date(2017, 10, 29, 17, 20, 01, 507451, time.UTC)}
 	totalUnits := 14678.33 + 85345.33 + 5000.00 + 4501.02
 
+	// Applications
+	db.Exec("TRUNCATE TABLE applications;")
+	db.Create(&Application{Name: "CLI App", ClientId: "PPbUVLxH8sDJLqzDbQE3", GrantType: "password"})
+	db.Create(&Application{Name: "Webapp App", ClientId: "Vm4YwgHM2bweuzYeZ", GrantType: "password"})
+	db.Create(&Application{Name: "Ionic App", ClientId: "6mQyDAcT8Dwwe6FDxd", GrantType: "password"})
+
 	// Users
 	db.Exec("TRUNCATE TABLE users;")
-	db.Create(&User{FirstName: "Rob", LastName: "Tester", Email: "spicer+robtester@cloudmanic.com"})
-	db.Create(&User{FirstName: "Jane", LastName: "Wells", Email: "spicer+janewells@cloudmanic.com"})
-	db.Create(&User{FirstName: "Bob", LastName: "Rosso", Email: "spicer+bobrosso@cloudmanic.com"})
+	db.Create(&User{FirstName: "Rob", LastName: "Tester", Email: "spicer+robtester@options.cafe"})
+	db.Create(&User{FirstName: "Jane", LastName: "Wells", Email: "spicer+janewells@options.cafe"})
+	db.Create(&User{FirstName: "Bob", LastName: "Rosso", Email: "spicer+bobrosso@options.cafe"})
 
 	// Sessions
 	db.Exec("TRUNCATE TABLE sessions;")

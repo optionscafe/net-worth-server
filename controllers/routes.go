@@ -40,5 +40,5 @@ func (t *Controller) DoRoutes(r *gin.Engine) {
 	// ------------ Non-Auth Routes ------ //
 
 	// // Auth Routes
-	r.POST("/login", t.DoLogin)
+	r.POST("/oauth/token", t.DoOauthToken)
 }

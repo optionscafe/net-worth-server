@@ -15,12 +15,12 @@ import (
 //
 // Create a new user account.
 //
-// go run main.go -cmd=create-user -first=Spicer -last=Matthews -email=spicer@cloudmanic.com -password=foobar
+// go run main.go -cmd=create-user -first=Spicer -last=Matthews -email=spicer@cloudmanic.com -password=foobar -app_id=1
 //
-func CreateUserAccount(db *models.DB, first string, last string, email string, password string) {
+func CreateUserAccount(db *models.DB, first string, last string, email string, password string, appId uint) {
 
 	// Create user. (note we do not do any validation know what your doing....)
-	user, err := db.CreateUser(first, last, email, password, "-cmd=create-user", "127.0.0.1")
+	user, err := db.CreateUser(first, last, email, password, appId, "-cmd=create-user", "127.0.0.1")
 
 	if err != nil {
 		panic(err)
