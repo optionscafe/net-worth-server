@@ -58,7 +58,7 @@ func (db *DB) GetAllLedgers() []Ledger {
 
 	ledgers := []Ledger{}
 
-	db.Order("account_id asc").Find(&ledgers)
+	db.Order("date desc").Find(&ledgers)
 
 	// Add in our one to one look ups
 	for i := range ledgers {
