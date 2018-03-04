@@ -9,6 +9,7 @@ package controllers
 import (
 	"io/ioutil"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -88,8 +89,16 @@ func (t *Controller) GetAccountMarks(c *gin.Context) {
 //
 func (t *Controller) CreateAccountMark(c *gin.Context) {
 
-	// Grab date for late formatting.
-	id := c.MustGet("id").(uint)
+	// Get the account id.
+	idInt, err := strconv.Atoi(c.Param("id"))
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Unable to parse account id."})
+		return
+	}
+
+	id := uint(idInt)
+
 	body, _ := ioutil.ReadAll(c.Request.Body)
 	date := gjson.Get(string(body), "date").String()
 	balance := gjson.Get(string(body), "balance").Float()
