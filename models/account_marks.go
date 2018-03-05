@@ -7,8 +7,9 @@
 package models
 
 import (
-	"github.com/optionscafe/net-worth-server/services"
 	"time"
+
+	"github.com/optionscafe/net-worth-server/services"
 )
 
 type AccountMarks struct {
@@ -30,7 +31,7 @@ func (db *DB) GetMarksByAccountById(accountId uint) []AccountMarks {
 	m := []AccountMarks{}
 
 	// Make query
-	db.Where("account_id = ?", accountId).Order("date asc").Find(&m)
+	db.Where("account_id = ?", accountId).Order("date desc").Find(&m)
 
 	// Return the accounts.
 	return m
