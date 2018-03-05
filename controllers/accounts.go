@@ -35,8 +35,16 @@ func (t *Controller) GetAccounts(c *gin.Context) {
 //
 func (t *Controller) GetAccount(c *gin.Context) {
 
+	// Get the account id.
+	idInt, err := strconv.Atoi(c.Param("id"))
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Unable to parse account id."})
+		return
+	}
+
 	// Get the account by id.
-	account, err := t.DB.GetAccountById(c.MustGet("id").(uint))
+	account, err := t.DB.GetAccountById(uint(idInt))
 
 	// Return json based on if this was a good result or not.
 	if err != nil {
@@ -78,8 +86,16 @@ func (t *Controller) CreateAccount(c *gin.Context) {
 //
 func (t *Controller) GetAccountMarks(c *gin.Context) {
 
+	// Get the account id.
+	idInt, err := strconv.Atoi(c.Param("id"))
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Unable to parse account id."})
+		return
+	}
+
 	// Return Happy
-	c.JSON(http.StatusOK, t.DB.GetMarksByAccountById(c.MustGet("id").(uint)))
+	c.JSON(http.StatusOK, t.DB.GetMarksByAccountById(uint(idInt)))
 }
 
 //
@@ -137,7 +153,14 @@ func (t *Controller) CreateAccountMark(c *gin.Context) {
 //
 func (t *Controller) AccountManageFunds(c *gin.Context) {
 
-	id := c.MustGet("id").(uint)
+	// Get the account id.
+	idInt, err := strconv.Atoi(c.Param("id"))
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Unable to parse account id."})
+		return
+	}
+
 	body, _ := ioutil.ReadAll(c.Request.Body)
 	date := gjson.Get(string(body), "date").String()
 	amount := gjson.Get(string(body), "amount").Float()
@@ -152,10 +175,10 @@ func (t *Controller) AccountManageFunds(c *gin.Context) {
 	}
 
 	// Add / Subtract money to an account units
-	t.DB.AccountUnitsAddFunds(id, pDate, amount, note)
+	t.DB.AccountUnitsAddFunds(uint(idInt), pDate, amount, note)
 
 	// Get the account by id.
-	account, err := t.DB.GetAccountById(id)
+	account, err := t.DB.GetAccountById(uint(idInt))
 
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})

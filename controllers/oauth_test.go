@@ -37,7 +37,7 @@ func TestDoOauthToken01(t *testing.T) {
 	var postStr = []byte(`{ "username": "spicer@cloudmanic.com", "password": "foobar", "client_id": "Vm4YwgHM2bweuzYeZ", "grant_type": "password" }`)
 
 	// Make a mock request.
-	req, _ := http.NewRequest("POST", "/login", bytes.NewBuffer(postStr))
+	req, _ := http.NewRequest("POST", "/oauth/token", bytes.NewBuffer(postStr))
 	req.Header.Set("Accept", "application/json")
 
 	// Setup writer.
@@ -45,7 +45,7 @@ func TestDoOauthToken01(t *testing.T) {
 	gin.SetMode("release")
 	gin.DisableConsoleColor()
 	r := gin.New()
-	r.POST("/login", c.DoOauthToken)
+	r.POST("/oauth/token", c.DoOauthToken)
 	r.ServeHTTP(w, req)
 
 	// Parse json that returned.
@@ -61,7 +61,7 @@ func TestDoOauthToken01(t *testing.T) {
 	postStr = []byte(`{ "username": "spicer@cloudmanic.com", "password": "abc123", "client_id": "Vm4YwgHM2bweuzYeZ", "grant_type": "password" }`)
 
 	// Make a mock request.
-	req2, _ := http.NewRequest("POST", "/login", bytes.NewBuffer(postStr))
+	req2, _ := http.NewRequest("POST", "/oauth/token", bytes.NewBuffer(postStr))
 	req2.Header.Set("Accept", "application/json")
 
 	// Setup writer.
@@ -69,7 +69,7 @@ func TestDoOauthToken01(t *testing.T) {
 	gin.SetMode("release")
 	gin.DisableConsoleColor()
 	r = gin.New()
-	r.POST("/login", c.DoOauthToken)
+	r.POST("/oauth/token", c.DoOauthToken)
 	r.ServeHTTP(w, req2)
 
 	// Parse json that returned.
