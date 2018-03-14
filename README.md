@@ -14,6 +14,8 @@ Net worth server is not really useful without a client. Here is a list of client
 
 * [Net Worth Ionic](https://github.com/optionscafe/net-worth-ionic)
 
+* [Net Worth Web](https://github.com/optionscafe/net-worth-web)
+
 # Unit Testing 
 
 With unit testing we setup a testing database (based off the value of the ```DB_DATABASE_TESTING``` OS variable). We run our tests at the highest levels. For example for an HTTP call (which is most of the app) we test the HTTP response controller. This way we are testing the models and helper packages that goes into generating the HTTP response, by doing it this way we get pretty great coverage. The goal is to cover the entire app just at the highest levels.  
