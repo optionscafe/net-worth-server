@@ -33,7 +33,7 @@ func TestCreateLedger01(t *testing.T) {
 	c := &Controller{DB: db}
 
 	// Post data
-	var postStr = []byte(`{"date": "2017-10-05","amount":1001.12,"account_id":1,"category_name":"Dividends","note":"This is a test note."}`)
+	var postStr = []byte(`{"date": "2017-10-05","amount":1001.12,"account_id":1,"category_name":"Dividends","note":"This is a test note.", "symbol": "bac"}`)
 
 	// Setup request
 	req, _ := http.NewRequest("POST", "/api/v1/ledgers", bytes.NewBuffer(postStr))
@@ -56,6 +56,7 @@ func TestCreateLedger01(t *testing.T) {
 	st.Expect(t, result.Id, uint(5))
 	st.Expect(t, result.Date.Format("2006-01-02"), "2017-10-05")
 	st.Expect(t, result.AccountName, "Tradier")
+	st.Expect(t, result.Symbol, "BAC")
 	st.Expect(t, result.CategoryName, "Dividends")
 	st.Expect(t, result.Amount, 1001.12)
 	st.Expect(t, result.Note, "This is a test note.")

@@ -1,3 +1,12 @@
+/**
+ * @Author: Spicer Matthews
+ * @Date:   03/01/2018
+ * @Email:  spicer@cloudmanic.com
+ * @Last modified by:   Spicer Matthews
+ * @Last modified time: 03/13/2018
+ * @Copyright: 2018 Cloudmanic Labs, LLC. All rights reserved.
+ */
+
 //
 // Date: 3/1/2018
 // Author(s): Spicer Matthews (spicer@options.cafe)
@@ -77,7 +86,7 @@ func (db *DB) LoginUserByEmailPass(email string, password string, appId uint, us
 	user, err := db.GetUserByEmail(email)
 
 	if err != nil {
-		return user, errors.New("Sorry, we were unable to find our account.")
+		return user, errors.New("Sorry, we could not find your account.")
 	}
 
 	// Validate password here by comparing hashes nil means success

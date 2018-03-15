@@ -49,11 +49,8 @@ func TestDoOauthToken01(t *testing.T) {
 	r.ServeHTTP(w, req)
 
 	// Parse json that returned.
-	st.Expect(t, gjson.Get(w.Body.String(), "id").Int(), int64(4))
-	st.Expect(t, gjson.Get(w.Body.String(), "first_name").String(), "Spicer")
-	st.Expect(t, gjson.Get(w.Body.String(), "last_name").String(), "Matthews")
-	st.Expect(t, gjson.Get(w.Body.String(), "email").String(), "spicer@cloudmanic.com")
-	st.Expect(t, len(gjson.Get(w.Body.String(), "session.access_token").String()), 50)
+	st.Expect(t, len(gjson.Get(w.Body.String(), "access_token").String()), 50)
+	st.Expect(t, gjson.Get(w.Body.String(), "token_type").String(), "bearer")
 
 	// ------------- Test the login fails for the wrong password. ----------- //
 

@@ -65,7 +65,7 @@ type Datastore interface {
 
 	// Ledgers
 	GetAllLedgers() []Ledger
-	CreateLedger(uint, Date, float64, string, string) (*Ledger, error)
+	CreateLedger(accountId uint, date Date, amount float64, category string, symbol string, note string) (*Ledger, error)
 
 	// LedgerCategory
 	GetLedgerCategoryById(uint) (LedgerCategory, error)

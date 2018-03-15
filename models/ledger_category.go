@@ -13,9 +13,9 @@ import (
 
 type LedgerCategory struct {
 	Id        uint      `gorm:"primary_key" json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	Name      string    `sql:"not null" json:"Name"`
+	CreatedAt time.Time `json:"_"`
+	UpdatedAt time.Time `json:"_"`
+	Name      string    `sql:"not null" json:"name"`
 }
 
 //

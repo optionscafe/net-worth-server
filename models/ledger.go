@@ -25,6 +25,7 @@ type Ledger struct {
 	CategoryId   uint      `sql:"not null;index:CategoryId" json:"category_id"`
 	CategoryName string    `gorm:"-" json:"category_name"`
 	Amount       float64   `sql:"type:DECIMAL(12,2)" json:"amount"`
+	Symbol       string    `sql:"not null" json:"symbol"`
 	Note         string    `sql:"not null" json:"note"`
 }
 
@@ -75,7 +76,7 @@ func (db *DB) GetAllLedgers() []Ledger {
 //
 // Insert Ledger
 //
-func (db *DB) CreateLedger(accountId uint, date Date, amount float64, category string, note string) (*Ledger, error) {
+func (db *DB) CreateLedger(accountId uint, date Date, amount float64, category string, symbol string, note string) (*Ledger, error) {
 
 	// Get category name.
 	catName := strings.Title(strings.ToLower(strings.Trim(category, " ")))
@@ -84,7 +85,7 @@ func (db *DB) CreateLedger(accountId uint, date Date, amount float64, category s
 	c := LedgerCategory{}
 	db.FirstOrCreate(&c, LedgerCategory{Name: catName})
 
-	u := Ledger{AccountId: accountId, Date: date, Amount: amount, Note: note, CategoryId: c.Id}
+	u := Ledger{AccountId: accountId, Date: date, Amount: amount, Note: note, CategoryId: c.Id, Symbol: strings.ToUpper(symbol)}
 
 	if err := db.Create(&u).Error; err != nil {
 		services.LogError(err, "")

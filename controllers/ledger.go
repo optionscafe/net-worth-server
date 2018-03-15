@@ -27,7 +27,7 @@ func (t *Controller) GetLedgers(c *gin.Context) {
 //
 // Create a new record from the data passed in.
 //
-// curl -H "Content-Type: application/json" -X POST -d '{"date": "2017-10-05","amount":1001.12,"account_id":1,"category_name":"Dividends","note":"This is a test note."}' -H "Authorization: Bearer XXXXXX" http://localhost:9090/api/v1/ledgers
+// curl -H "Content-Type: application/json" -X POST -d '{"date": "2017-10-05","amount":1001.12,"account_id":1,"category_name":"Dividends","note":"This is a test note.", "symbol": "BAC"}' -H "Authorization: Bearer XXXXXX" http://localhost:9090/api/v1/ledgers
 //
 func (t *Controller) CreateLedger(c *gin.Context) {
 
@@ -39,7 +39,7 @@ func (t *Controller) CreateLedger(c *gin.Context) {
 	}
 
 	// Store in database & return json.
-	newLedger, err := t.DB.CreateLedger(ledger.AccountId, ledger.Date, ledger.Amount, ledger.CategoryName, ledger.Note)
+	newLedger, err := t.DB.CreateLedger(ledger.AccountId, ledger.Date, ledger.Amount, ledger.CategoryName, ledger.Symbol, ledger.Note)
 
 	// Return json based on if this was a good result or not.
 	if err != nil {

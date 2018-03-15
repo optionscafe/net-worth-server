@@ -28,6 +28,9 @@ func (t *Controller) DoRoutes(r *gin.Engine) {
 		apiV1.GET("/ledgers", t.GetLedgers)
 		apiV1.POST("/ledgers", t.CreateLedger)
 
+		// Ledger Categories
+		apiV1.GET("/ledger_categories", t.GetLedgersCategories)
+
 		// Account routes
 		apiV1.GET("/accounts", t.GetAccounts)
 		apiV1.POST("/accounts", t.CreateAccount)
