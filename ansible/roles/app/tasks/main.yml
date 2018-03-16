@@ -12,6 +12,10 @@
 - name: Create docker build directory
   file: path={{ SERVER_ROOT }}/docker/build owner={{ SERVER_USER }} group={{ SERVER_GROUP }} mode=0755 state=directory
 
+# Create docker build frontend directory
+- name: Create docker build frontend directory
+  file: path={{ SERVER_ROOT }}/docker/build/frontend owner={{ SERVER_USER }} group={{ SERVER_GROUP }} mode=0755 state=directory
+
 # Install docker-compose
 - name: Install docker-compose
   template: src=docker-compose.yml dest={{ SERVER_ROOT }}/docker/docker-compose.yml owner={{ SERVER_USER }} group={{ SERVER_GROUP }} mode=0644

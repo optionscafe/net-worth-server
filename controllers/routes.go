@@ -7,6 +7,7 @@
 package controllers
 
 import (
+	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 )
 
@@ -44,4 +45,9 @@ func (t *Controller) DoRoutes(r *gin.Engine) {
 
 	// // Auth Routes
 	r.POST("/oauth/token", t.DoOauthToken)
+
+	// -------- Static Files ------------ //
+
+	r.Use(static.Serve("/", static.LocalFile("/frontend", true)))
+	r.NoRoute(func(c *gin.Context) { c.File("/frontend/index.html") })
 }

@@ -19,25 +19,28 @@ RUN apk add --no-cache bash git
 RUN set -x \
       && echo "root:x:0:0:root:/root:/bin/ash" > /etc/passwd \
       && echo "root:::0:::::" > /etc/shadow \
-      && echo "root:x:0:root" > /etc/group 
-      
+      && echo "root:x:0:root" > /etc/group
+
 # Ensure deploy user exists (as our local user)
-RUN set -x \ 
+RUN set -x \
   && addgroup -g ${P_GID} -S deploy \
-  && adduser -u ${P_UID} -D -S -G deploy deploy 
-   
+  && adduser -u ${P_UID} -D -S -G deploy deploy
+
 # Setup directory and Set perms for app root
 RUN set -x \
   && mkdir /work \
-  && chmod 755 /work \    
-  && chown -R deploy:deploy /work  
-  
+  && chmod 755 /work \
+  && chown -R deploy:deploy /work
+
 # Copy binary into place.
 COPY net-worth-server /work/app
 
+# Copy frontend into place.
+COPY frontend /frontend
+
 # Expose http and https ports
 EXPOSE 9090
-  
+
 # This needs to be at the bottom. (back from root)
 USER deploy
 
