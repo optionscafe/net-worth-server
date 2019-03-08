@@ -40,7 +40,7 @@ func main() {
 	// Setup cron jobs
 	cron.AllyStart(db)
 	cron.TradierStart(db)
-	cron.RobinhoodStart(db)
+	//cron.RobinhoodStart(db)
 
 	// Startup controller
 	c := &controllers.Controller{DB: db}
