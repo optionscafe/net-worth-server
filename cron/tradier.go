@@ -8,13 +8,14 @@ package cron
 
 import (
 	"errors"
+	"net/http"
+	"os"
+	"time"
+
 	"github.com/jasonlvhit/gocron"
 	"github.com/optionscafe/net-worth-server/brokers/tradier"
 	"github.com/optionscafe/net-worth-server/models"
 	"github.com/optionscafe/net-worth-server/services"
-	"net/http"
-	"os"
-	"time"
 )
 
 //

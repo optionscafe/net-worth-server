@@ -43,8 +43,11 @@ func (t *Controller) DoRoutes(r *gin.Engine) {
 
 	// ------------ Non-Auth Routes ------ //
 
-	// // Auth Routes
+	// Auth Routes
 	r.POST("/oauth/token", t.DoOauthToken)
+
+	// Webhooks
+	r.POST("/webhooks/emails", t.DoWebhookEmails)
 
 	// -------- Static Files ------------ //
 

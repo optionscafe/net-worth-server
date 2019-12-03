@@ -1,0 +1,19 @@
+version: '2.1'
+
+services:
+
+  # mariadb 10.2
+  mariadb102:
+    image: mariadb:10.2
+
+    container_name: mariadb-10.2.net-worth-server
+
+    ports:
+      - 127.0.0.1:9406:3306
+
+    volumes:
+      - ./mariadb102_data:/var/lib/mysql
+
+    environment:
+      MYSQL_DATABASE: net_worth_server
+      MYSQL_ROOT_PASSWORD: foobar

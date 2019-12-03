@@ -4,3 +4,4 @@
 deploy.retry
 ansible/vars/env.yml
 ansible/hosts
+mariadb102_data
