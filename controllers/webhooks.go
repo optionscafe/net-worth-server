@@ -76,6 +76,13 @@ func (t *Controller) DoWebhookEmails(c *gin.Context) {
 		return
 	}
 
+	// Make sure he balance is greater than zero
+	if parsed.Balance <= 0 {
+		services.Error(errors.New("Etrade balance is not greater than zero."))
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
 	// Get the account id
 	acctID, err := strconv.ParseFloat(os.Getenv("ETRADE_ACCOUNT_ID"), 64)
 
